@@ -1,4 +1,5 @@
-import { Client, GatewayIntentBits } from "discord.js";
+import { Client, GatewayIntentBits } from 'discord.js';
+import { loadEvents } from './events';
 
 class DiscordClient extends Client {
   constructor() {
@@ -12,6 +13,7 @@ class DiscordClient extends Client {
   }
 
   public async start(token: string): Promise<void> {
+    loadEvents(this);
     await this.login(token);
   }
 }
