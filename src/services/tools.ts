@@ -1,12 +1,12 @@
 import { type Tool, tool } from "ai";
 import { z } from "zod";
 
-export type ToolEntry<T extends z.ZodType = z.ZodType> = {
+export type ToolEntry<Schema extends z.ZodType = z.ZodType> = {
   id: string;
   name: string;
   description: string;
-  inputSchema: T;
-  execute: (input: z.infer<T>) => unknown | Promise<unknown>;
+  inputSchema: Schema;
+  execute: (input: z.infer<Schema>) => unknown | Promise<unknown>;
 };
 
 export type ToolMetadata = {
@@ -18,12 +18,11 @@ export type ToolMetadata = {
 const registry = new Map<string, ToolEntry>();
 
 const findByIdOrName = (idOrName: string): ToolEntry | undefined => {
-  const direct = registry.get(idOrName);
-  if (direct) return direct;
-  for (const entry of registry.values()) {
-    if (entry.name === idOrName) return entry;
+  const directHit = registry.get(idOrName);
+  if (directHit) {
+    return directHit;
   }
-  return undefined;
+  return Array.from(registry.values()).find((entry) => entry.name === idOrName);
 };
 
 const toAITool = (entry: ToolEntry): Tool =>
@@ -33,37 +32,47 @@ const toAITool = (entry: ToolEntry): Tool =>
     execute: async (input) => entry.execute(input),
   });
 
-export const add = <T extends z.ZodType>(entry: ToolEntry<T>): void => {
+export const add = <Schema extends z.ZodType>(
+  entry: ToolEntry<Schema>,
+): void => {
   registry.set(entry.id, entry as unknown as ToolEntry);
 };
 
 export const remove = (idOrName: string): boolean => {
   const entry = findByIdOrName(idOrName);
-  if (!entry) return false;
+  if (!entry) {
+    return false;
+  }
   return registry.delete(entry.id);
 };
 
-export const get = (idOrName: string): ToolEntry | undefined =>
-  findByIdOrName(idOrName);
+export const get = (idOrName: string): ToolEntry | undefined => {
+  return findByIdOrName(idOrName);
+};
 
 export const search = (term: string): ToolMetadata[] => {
-  const t = term.toLowerCase();
-  return Array.from(registry.values())
-    .filter(
-      (e) =>
-        e.id.toLowerCase().includes(t) ||
-        e.name.toLowerCase().includes(t) ||
-        e.description.toLowerCase().includes(t),
-    )
-    .map(({ id, name, description }) => ({ id, name, description }));
+  const lowercaseTerm = term.toLowerCase();
+  const matches = Array.from(registry.values()).filter((entry) => {
+    const idMatch = entry.id.toLowerCase().includes(lowercaseTerm);
+    const nameMatch = entry.name.toLowerCase().includes(lowercaseTerm);
+    const descriptionMatch = entry.description
+      .toLowerCase()
+      .includes(lowercaseTerm);
+    return idMatch || nameMatch || descriptionMatch;
+  });
+  return matches.map((entry) => ({
+    id: entry.id,
+    name: entry.name,
+    description: entry.description,
+  }));
 };
 
 export const all = (): Record<string, Tool> => {
-  const out: Record<string, Tool> = {};
-  for (const entry of registry.values()) {
-    out[entry.name] = toAITool(entry);
-  }
-  return out;
+  const entries = Array.from(registry.values()).map((entry) => [
+    entry.name,
+    toAITool(entry),
+  ]);
+  return Object.fromEntries(entries);
 };
 
 export const searchTool: Tool = tool({
