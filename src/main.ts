@@ -22,11 +22,12 @@ const argv = await yargs(hideBin(process.argv))
     choices: PLATFORMS,
     demandOption: true,
     describe: 'Which platform to run on',
+    default: 'discord',
   })
   .strict()
   .parseAsync();
 
-const platform: Platform = argv.platform;
+const platform: Platform = argv.platform as Platform;
 
 const run = async () => {
   await initLogger();
