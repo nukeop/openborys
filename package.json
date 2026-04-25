@@ -20,6 +20,9 @@
     "@ai-sdk/anthropic": "^3.0.71",
     "ai": "^6.0.168",
     "discord-api-types": "^0.38.47",
-    "discord.js": "^14.26.3"
+    "discord.js": "^14.26.3",
+    "dotenv": "^17.4.2",
+    "replicate": "^1.4.0",
+    "sharp": "^0.34.5"
   }
 }
