@@ -8,7 +8,7 @@ const factories: Record<Provider, (model: string) => LanguageModel> = {
 };
 
 let activeProvider: Provider = "anthropic";
-let activeModelName = "claude-sonnet-4-5";
+let activeModelName = "claude-sonnet-4-6";
 let activeModel: LanguageModel = factories[activeProvider](activeModelName);
 
 export const setActive = (provider: Provider, model: string): void => {
