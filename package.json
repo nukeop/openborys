@@ -1,17 +1,18 @@
 {
   "name": "openborys",
-  "module": "main.ts",
+  "module": "src/main.ts",
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "bun run main.ts",
+    "start": "bun run src/main.ts",
     "check": "biome check",
     "format": "biome format --write",
     "lint": "biome lint"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.13",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/yargs": "^17.0.35"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -23,6 +24,7 @@
     "discord.js": "^14.26.3",
     "dotenv": "^17.4.2",
     "replicate": "^1.4.0",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "yargs": "^18.0.0"
   }
 }
