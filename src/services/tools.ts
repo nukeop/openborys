@@ -15,14 +15,14 @@ export type ToolMetadata = {
   description: string;
 };
 
-const registry = new Map<string, ToolEntry>();
+const registry: ToolEntry[] = [];
 
 const findByIdOrName = (idOrName: string): ToolEntry | undefined => {
-  const directHit = registry.get(idOrName);
-  if (directHit) {
-    return directHit;
+  const matchById = registry.find((entry) => entry.id === idOrName);
+  if (matchById) {
+    return matchById;
   }
-  return Array.from(registry.values()).find((entry) => entry.name === idOrName);
+  return registry.find((entry) => entry.name === idOrName);
 };
 
 const toAITool = (entry: ToolEntry): Tool =>
@@ -35,15 +35,26 @@ const toAITool = (entry: ToolEntry): Tool =>
 export const add = <Schema extends z.ZodType>(
   entry: ToolEntry<Schema>,
 ): void => {
-  registry.set(entry.id, entry as unknown as ToolEntry);
+  const stored = entry as unknown as ToolEntry;
+  const existingIndex = registry.findIndex(
+    (existing) => existing.id === entry.id,
+  );
+  if (existingIndex >= 0) {
+    registry[existingIndex] = stored;
+    return;
+  }
+  registry.push(stored);
 };
 
 export const remove = (idOrName: string): boolean => {
-  const entry = findByIdOrName(idOrName);
-  if (!entry) {
+  const targetIndex = registry.findIndex(
+    (entry) => entry.id === idOrName || entry.name === idOrName,
+  );
+  if (targetIndex < 0) {
     return false;
   }
-  return registry.delete(entry.id);
+  registry.splice(targetIndex, 1);
+  return true;
 };
 
 export const get = (idOrName: string): ToolEntry | undefined => {
@@ -52,7 +63,7 @@ export const get = (idOrName: string): ToolEntry | undefined => {
 
 export const search = (term: string): ToolMetadata[] => {
   const lowercaseTerm = term.toLowerCase();
-  const matches = Array.from(registry.values()).filter((entry) => {
+  const matches = registry.filter((entry) => {
     const idMatch = entry.id.toLowerCase().includes(lowercaseTerm);
     const nameMatch = entry.name.toLowerCase().includes(lowercaseTerm);
     const descriptionMatch = entry.description
@@ -68,10 +79,9 @@ export const search = (term: string): ToolMetadata[] => {
 };
 
 export const all = (): Record<string, Tool> => {
-  const entries = Array.from(registry.values()).map((entry) => [
-    entry.name,
-    toAITool(entry),
-  ]);
+  const entries = registry.map(
+    (entry) => [entry.name, toAITool(entry)] as const,
+  );
   return Object.fromEntries(entries);
 };
 
