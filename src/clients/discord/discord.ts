@@ -1,5 +1,4 @@
 import { Client, GatewayIntentBits } from "discord.js";
-import dotenv from "dotenv";
 
 class DiscordClient extends Client {
   constructor() {
@@ -18,7 +17,6 @@ class DiscordClient extends Client {
 }
 
 export const run = async () => {
-  dotenv.config();
   const client = new DiscordClient();
   await client.start(process.env.DISCORD_TOKEN!);
 };

@@ -10,7 +10,7 @@
     "lint": "biome lint"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.13",
+    "@biomejs/biome": "^2.4.12",
     "@types/bun": "latest",
     "@types/yargs": "^17.0.35"
   },
@@ -19,10 +19,11 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.71",
+    "@logtape/logtape": "^2.0.5",
+    "@logtape/pretty": "^2.0.5",
     "ai": "^6.0.168",
     "discord-api-types": "^0.38.47",
     "discord.js": "^14.26.3",
-    "dotenv": "^17.4.2",
     "replicate": "^1.4.0",
     "sharp": "^0.34.5",
     "yargs": "^18.0.0",
