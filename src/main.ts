@@ -5,6 +5,7 @@ import { run as runDiscord } from './clients/discord/discord';
 import { run as runMatrix } from './clients/matrix/matrix';
 import { run as runTui } from './clients/tui/tui';
 import { initLogger } from './logger';
+import { loadPrompts } from './prompts';
 
 const logger = getLogger(['OpenBorys', 'main']);
 const PLATFORMS = ['matrix', 'discord', 'tui'] as const;
@@ -31,6 +32,7 @@ const platform: Platform = argv.platform as Platform;
 
 const run = async () => {
   await initLogger();
+  const prompts = await loadPrompts();
   logger.info('Initializing OpenBorys on {platform}', { platform });
   await runners[platform]();
 };
