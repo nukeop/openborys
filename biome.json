@@ -19,6 +19,9 @@
       "recommended": true,
       "style": {
         "useBlockStatements": "error"
+      },
+      "complexity": {
+        "noStaticOnlyClass": "off"
       }
     }
   },
