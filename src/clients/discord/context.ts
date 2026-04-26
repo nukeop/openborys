@@ -9,7 +9,7 @@ export const getLastMessages = async (message: Message,
   const rawMessages = await message.channel.messages.fetch({
     limit: contextWindowSize,
   });
-  const messages = rawMessages.filter(message => message.cleanContent).map(message => {
+  const messages = rawMessages.reverse().filter(message => message.cleanContent).map(message => {
     const isOwnMessage = message.author.id === message.client.user.id;
     const timestamp = formatTimestamp(message.createdTimestamp);
     const serverNickname = (
