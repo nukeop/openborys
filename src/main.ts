@@ -4,6 +4,7 @@ import { hideBin } from 'yargs/helpers';
 import { run as runDiscord } from './clients/discord/discord';
 import { run as runMatrix } from './clients/matrix/matrix';
 import { run as runTui } from './clients/tui/tui';
+import { loadEnvironment } from './environment';
 import { initLogger } from './logger';
 import { loadPrompts } from './prompts';
 import { SystemPromptService } from './services/system-prompt';
@@ -32,7 +33,12 @@ const argv = await yargs(hideBin(process.argv))
 const platform: Platform = argv.platform as Platform;
 
 const run = async () => {
+  const env = loadEnvironment();
   await initLogger();
+  logger.info('Environment validated ({count} variables) in {mode} mode', {
+    count: Object.keys(env).length,
+    mode: env.NODE_ENV,
+  });
   const prompts = await loadPrompts();
   SystemPromptService.setSystemPrompt(prompts);
   logger.info('Initializing OpenBorys on {platform}', {

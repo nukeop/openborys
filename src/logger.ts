@@ -10,7 +10,7 @@ export const initLogger = async () => {
   await configure({
     sinks: {
       console: getConsoleSink({
-        formatter: isProd
+        formatter: isProd()
           ? getJsonLinesFormatter()
           : getPrettyFormatter({ properties: true }),
       }),

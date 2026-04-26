@@ -1,1 +1,53 @@
-export const isProd = process.env.NODE_ENV === 'production';
+import { z } from 'zod';
+
+const envSchema = z.object({
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
+
+  DISCORD_TOKEN: z.string().min(1),
+  DISCORD_CLIENT_ID: z.string().min(1),
+
+  ANTHROPIC_API_KEY: z.string().min(1),
+
+  UPSTASH_REDIS_REST_URL: z.url(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
+
+  REPLICATE_API_TOKEN: z.string().min(1),
+
+  AWS_ACCESS_KEY_ID: z.string().min(1),
+  AWS_SECRET_ACCESS_KEY: z.string().min(1),
+  AWS_ENDPOINT_URL_S3: z.url(),
+  AWS_REGION: z.string().min(1).default('auto'),
+  AWS_BUCKET: z.string().min(1),
+
+  PROMPTS_PREFIX: z.string().min(1).default('prompts/'),
+});
+
+export type Environment = z.infer<typeof envSchema>;
+
+let cached: Environment | null = null;
+
+export const loadEnvironment = (): Environment => {
+  const parsed = envSchema.safeParse(process.env);
+
+  if (!parsed.success) {
+    throw new Error(
+      `Invalid environment variables:\n${z.prettifyError(parsed.error)}`,
+    );
+  }
+
+  cached = parsed.data;
+  return cached;
+};
+
+export const env = (): Environment => {
+  if (!cached) {
+    throw new Error(
+      'Environment accessed before loadEnvironment() was called. Make sure init runs first.',
+    );
+  }
+  return cached;
+};
+
+export const isProd = (): boolean => env().NODE_ENV === 'production';

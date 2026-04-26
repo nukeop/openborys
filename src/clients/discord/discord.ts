@@ -1,4 +1,5 @@
 import { Client, GatewayIntentBits } from 'discord.js';
+import { env } from '../../environment';
 import { loadEvents } from './events';
 
 class DiscordClient extends Client {
@@ -20,5 +21,5 @@ class DiscordClient extends Client {
 
 export const run = async () => {
   const client = new DiscordClient();
-  await client.start(process.env.DISCORD_TOKEN!);
+  await client.start(env().DISCORD_TOKEN);
 };
