@@ -4,7 +4,7 @@ import { DISCORD_CONFIG } from '../../config/platforms/discord';
 import {
   createAssistantMessage,
   createUserMessage,
-} from '../../services/ai-tools';
+} from '../../services/ai-utils';
 import { SystemPromptService } from '../../services/system-prompt';
 import { formatTimestamp } from '../../utils/time';
 

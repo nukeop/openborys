@@ -1,7 +1,7 @@
 import { anthropic } from '@ai-sdk/anthropic';
 import { getLogger } from '@logtape/logtape';
 import { generateText, type LanguageModel, streamText } from 'ai';
-import { ToolService, toAITool, toAITools } from './tools';
+import { ToolService, toAITools } from './tools';
 
 const logger = getLogger(['OpenBorys', 'Service', 'AI']);
 
@@ -12,7 +12,7 @@ const factories: Record<Provider, (model: string) => LanguageModel> = {
 };
 
 let activeProvider: Provider = 'anthropic';
-let activeModelName = 'claude-sonnet-4-6';
+let activeModelName = 'claude-haiku-4-5';
 let activeModel: LanguageModel = factories[activeProvider](activeModelName);
 
 export const setActive = (provider: Provider, model: string): void => {

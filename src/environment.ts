@@ -10,8 +10,7 @@ const envSchema = z.object({
 
   ANTHROPIC_API_KEY: z.string().min(1),
 
-  UPSTASH_REDIS_REST_URL: z.url(),
-  UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
+  REDIS_URL: z.url(),
 
   REPLICATE_API_TOKEN: z.string().min(1),
 
