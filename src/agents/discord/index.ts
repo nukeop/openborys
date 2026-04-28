@@ -3,6 +3,7 @@ import type { Message } from 'discord.js';
 import { messageReceived } from './handlers/message-received';
 import { sendingMessage } from './handlers/sending-message';
 import { thinking } from './handlers/thinking';
+import { toolCall } from './handlers/tool-call';
 import type { AgentState, RunContext, State, StateHandler } from './types';
 
 const logger = getLogger(['OpenBorys', 'Agent', 'Discord']);
@@ -10,9 +11,7 @@ const logger = getLogger(['OpenBorys', 'Agent', 'Discord']);
 const handlers: Record<State, StateHandler> = {
   'message-received': messageReceived,
   thinking,
-  'tool-call': async (_ctx) => {
-    return null;
-  },
+  'tool-call': toolCall,
   'sending-message': sendingMessage,
   error: async (_ctx) => {
     return null;
