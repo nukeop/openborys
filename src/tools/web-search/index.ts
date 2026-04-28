@@ -11,7 +11,9 @@ const logger = getLogger(['OpenBorys', 'tools', 'web-search']);
 export const webSearchTool: ToolWithMeta<WebSearchInput, string> = {
   id: 'web_search',
   name: 'Web Search',
+  emoji: '🔍',
   isAlwaysAvailable: true,
+  formatArgs: (args) => args.query,
   tool: tool({
     description: 'Search the web.',
     inputSchema: webSearchInputSchema,

@@ -3,7 +3,9 @@ import type { Tool } from 'ai';
 export type ToolWithMeta<INPUT, OUTPUT> = {
   id: string;
   name: string;
+  emoji: string;
   isAlwaysAvailable: boolean;
+  formatArgs: (args: INPUT) => string;
   tool: Tool<INPUT, OUTPUT>;
 };
 

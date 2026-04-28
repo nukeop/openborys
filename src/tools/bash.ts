@@ -7,7 +7,9 @@ const logger = getLogger(['OpenBorys', 'tools', 'bash']);
 export const bashTool: ToolWithMeta<{ command: string }, string> = {
   id: 'bash',
   name: 'Bash',
+  emoji: '🖥️',
   isAlwaysAvailable: true,
+  formatArgs: (args) => args.command,
   tool: anthropic.tools.bash_20250124({
     execute: async ({ command }) => {
       logger.info('Running bash: {command}', { command });

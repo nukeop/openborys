@@ -11,7 +11,9 @@ const logger = getLogger(['OpenBorys', 'tools', 'web-fetch']);
 export const webFetchTool: ToolWithMeta<WebFetchInput, string> = {
   id: 'web_fetch',
   name: 'Web Fetch',
+  emoji: '🌐',
   isAlwaysAvailable: true,
+  formatArgs: (args) => args.url,
   tool: tool({
     description: 'Extract the contents of a web page.',
     inputSchema: webFetchInputSchema,
