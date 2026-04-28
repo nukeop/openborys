@@ -56,7 +56,10 @@ export const handleMessageCreate = (client: Client) => {
       //
       // message.channel.send(reply.text);
     } catch (error) {
-      logger.error('Unhandled error in messageCreate handler', { error });
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error('Unhandled error in messageCreate handler: {message}', {
+        message,
+      });
     }
   });
 };
