@@ -1,6 +1,8 @@
 import type { JSONValue, ToolCallPart, ToolResultPart } from 'ai';
 import { getLogger } from '@logtape/logtape';
+import { EmbedBuilder } from 'discord.js';
 import { RedisToolCallService } from '../../../services/redis-tool-calls';
+import { ToolService } from '../../../services/tools';
 import type { StateHandler } from '../types';
 
 const logger = getLogger([
@@ -44,11 +46,25 @@ export const toolCall: StateHandler = async (ctx) => {
   const channelId = ctx.source.channelId;
   const timestamp = Date.now();
 
-  result.toolCalls.forEach((call) => {
+  const embedPromises = result.toolCalls.flatMap((call) => {
     logger.info('Tool called: {toolName}', { toolName: call.toolName });
+
+    const tool = ToolService.findByIdOrName(call.toolName);
+    if (!tool || !ctx.source.channel.isSendable()) {
+      return [];
+    }
+
+    const formattedArgs = tool.formatArgs(call.input as never);
+
+    const embed = new EmbedBuilder().setDescription(
+      `${tool.emoji} **${tool.name}**\n${formattedArgs}`,
+    );
+
+    return [ctx.source.channel.send({ embeds: [embed] })];
   });
 
   await Promise.all([
+    Promise.all(embedPromises),
     ...result.toolCalls.map((call) =>
       RedisToolCallService.addToolCall({
         call: toToolCallPart(call),
