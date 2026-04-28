@@ -1,6 +1,7 @@
 import { getLogger } from '@logtape/logtape';
 import type { Message } from 'discord.js';
 import { messageReceived } from './handlers/message-received';
+import { sendingMessage } from './handlers/sending-message';
 import { thinking } from './handlers/thinking';
 import type { AgentState, RunContext, State, StateHandler } from './types';
 
@@ -12,9 +13,7 @@ const handlers: Record<State, StateHandler> = {
   'tool-call': async (_ctx) => {
     return null;
   },
-  'sending-message': async (_ctx) => {
-    return null;
-  },
+  'sending-message': sendingMessage,
   error: async (_ctx) => {
     return null;
   },
