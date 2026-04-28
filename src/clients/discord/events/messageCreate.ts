@@ -1,6 +1,7 @@
 import { getLogger } from '@logtape/logtape';
 import type { Client } from 'discord.js';
 import { ai } from '../../../services/ai';
+import { RedisToolCallService } from '../../../services/redis-tool-calls';
 import { getDiscordContext } from '../context';
 import { shouldReply } from '../utils';
 
@@ -16,15 +17,42 @@ export const handleMessageCreate = (client: Client) => {
       await message.channel.sendTyping();
       const { systemPrompt, context } = await getDiscordContext(message);
 
+      const serverId = message.guildId ?? 'dm';
+      const channelId = message.channelId;
+
       const reply = await ai.generateText({
-        messages: [
-          { role: 'system', content: systemPrompt },
-          ...context
-        ]
+        messages: [{ role: 'system', content: systemPrompt }, ...context],
+        onStepFinish: async (step) => {
+          const timestamp = Date.now();
+
+          step.toolCalls.forEach((call) => {
+            logger.info('Tool called: {toolName}', {
+              toolName: call.toolName,
+            });
+          });
+
+          await Promise.all([
+            ...step.toolCalls.map((call) =>
+              RedisToolCallService.addToolCall({
+                call,
+                serverId,
+                channelId,
+                timestamp,
+              }),
+            ),
+            ...step.toolResults.map((result) =>
+              RedisToolCallService.addToolResult({
+                result,
+                serverId,
+                channelId,
+                timestamp,
+              }),
+            ),
+          ]);
+        },
       });
 
-      message.channel.send(reply.text)
-
+      message.channel.send(reply.text);
     } catch (error) {
       logger.error('Unhandled error in messageCreate handler', { error });
     }

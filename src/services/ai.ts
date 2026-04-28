@@ -1,6 +1,6 @@
 import { anthropic } from '@ai-sdk/anthropic';
 import { getLogger } from '@logtape/logtape';
-import { generateText, type LanguageModel, streamText } from 'ai';
+import { generateText, type LanguageModel, stepCountIs, streamText } from 'ai';
 import { ToolService, toAITools } from './tools';
 
 const logger = getLogger(['OpenBorys', 'Service', 'AI']);
@@ -38,6 +38,7 @@ export const ai = {
       ...args,
       tools: toAITools(ToolService.getAlwaysAvailableTools()),
       model: activeModel,
+      stopWhen: stepCountIs(5),
     } as Parameters<typeof generateText>[0]);
   },
   streamText: (args: StreamArgs) => {
