@@ -1,4 +1,4 @@
-import type { ModelMessage } from 'ai';
+import type { GenerateTextResult, ModelMessage, ToolSet } from 'ai';
 import type { Message } from 'discord.js';
 
 export type State =
@@ -16,4 +16,5 @@ export type RunContext = {
   messages: ModelMessage[];
   stepCount: number;
   source: Message;
+  lastResult: GenerateTextResult<ToolSet, never> | null;
 };

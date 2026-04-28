@@ -37,6 +37,7 @@ export const runAgent = async (source: Message): Promise<void> => {
     messages: [],
     stepCount: 0,
     source,
+    lastResult: null,
   };
 
   return run({ type: 'message-received' }, ctx);
