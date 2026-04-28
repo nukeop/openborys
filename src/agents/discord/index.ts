@@ -1,5 +1,6 @@
 import { getLogger } from '@logtape/logtape';
 import type { Message } from 'discord.js';
+import { error } from './handlers/error';
 import { messageReceived } from './handlers/message-received';
 import { sendingMessage } from './handlers/sending-message';
 import { thinking } from './handlers/thinking';
@@ -13,9 +14,7 @@ const handlers: Record<State, StateHandler> = {
   thinking,
   'tool-call': toolCall,
   'sending-message': sendingMessage,
-  error: async (_ctx) => {
-    return null;
-  },
+  error,
 };
 
 const run = async (state: AgentState, ctx: RunContext): Promise<void> => {
