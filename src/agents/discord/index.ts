@@ -1,26 +1,8 @@
-import type { Message } from 'discord.js';
-
-type State =
-  | 'message-received'
-  | 'thinking'
-  | 'tool-call'
-  | 'sending-message'
-  | 'error';
-
-type AgentState = { type: State };
-
-type StateHandler = (ctx: RunContext) => Promise<AgentState | null>;
-
-type RunContext = {
-  messages: [];
-  stepCount: number;
-  source: Message;
-};
+import { messageReceived } from './handlers/message-received';
+import type { AgentState, RunContext, State, StateHandler } from './types';
 
 const handlers: Record<State, StateHandler> = {
-  'message-received': async (_ctx) => {
-    return null;
-  },
+  'message-received': messageReceived,
   thinking: async (_ctx) => {
     return null;
   },
