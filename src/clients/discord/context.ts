@@ -3,8 +3,14 @@ import type { Message as DiscordMessage } from 'discord.js';
 import { DISCORD_CONFIG } from '../../config/platforms/discord';
 import {
   createAssistantMessage,
+  createToolResult,
   createUserMessage,
 } from '../../services/ai-utils';
+import {
+  type StoredToolCall,
+  type StoredToolResult,
+  RedisToolCallService,
+} from '../../services/redis-tool-calls';
 import { SystemPromptService } from '../../services/system-prompt';
 import { formatTimestamp } from '../../utils/time';
 
@@ -67,6 +73,75 @@ export const getLastMessages = async (
     .toArray();
 
   return messages;
+};
+
+// This fetches all calls and results within a given time range.
+// For every call or result that doesn't have its pair in the initial fetch, we fetch the missing counterpart by id.
+// This is needed because APIs will reject calls that have tool calls without results or vice versa.
+export const getToolMessages = async (
+  serverId: string,
+  channelId: string,
+  from: number,
+  to: number,
+): Promise<ModelMessage[]> => {
+  const calls = await RedisToolCallService.getCallsInRange(
+    serverId,
+    channelId,
+    from,
+    to,
+  );
+  const results = await RedisToolCallService.getResultsInRange(
+    serverId,
+    channelId,
+    from,
+    to,
+  );
+
+  const unpairedCalls = calls.filter(
+    (call) =>
+      !results.some(
+        (result) => result.result.toolCallId === call.call.toolCallId,
+      ),
+  );
+  const unpairedResults = results.filter(
+    (result) =>
+      !calls.some((call) => call.call.toolCallId === result.result.toolCallId),
+  );
+
+  const missingCalls = await Promise.all(
+    unpairedResults.map((result) =>
+      RedisToolCallService.getToolCall(result.result.toolCallId),
+    ),
+  );
+  const missingResults = await Promise.all(
+    unpairedCalls.map((call) =>
+      RedisToolCallService.getToolResult(call.call.toolCallId),
+    ),
+  );
+
+  const allCalls = [...calls, ...missingCalls].filter(
+    Boolean,
+  ) as StoredToolCall[];
+  const allResults = [...results, ...missingResults].filter(
+    Boolean,
+  ) as StoredToolResult[];
+
+  const paired = allCalls
+    .map((call) => ({
+      call,
+      result: allResults.find(
+        (result) => result.result.toolCallId === call.call.toolCallId,
+      ),
+    }))
+    .filter(
+      (pair): pair is { call: StoredToolCall; result: StoredToolResult } =>
+        pair.result !== undefined,
+    );
+
+  return paired.flatMap(({ call, result }) => [
+    createAssistantMessage({ content: [call.call] }),
+    createToolResult({ content: [result.result] }),
+  ]);
 };
 
 export const getDiscordContext = async (message: DiscordMessage) => {

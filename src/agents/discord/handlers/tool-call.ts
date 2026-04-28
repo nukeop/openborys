@@ -1,3 +1,4 @@
+import type { JSONValue, ToolCallPart, ToolResultPart } from 'ai';
 import { getLogger } from '@logtape/logtape';
 import { RedisToolCallService } from '../../../services/redis-tool-calls';
 import type { StateHandler } from '../types';
@@ -9,6 +10,28 @@ const logger = getLogger([
   'EventHandlers',
   'ToolCall',
 ]);
+
+const toToolCallPart = (call: {
+  toolCallId: string;
+  toolName: string;
+  input: unknown;
+}): ToolCallPart => ({
+  type: 'tool-call',
+  toolCallId: call.toolCallId,
+  toolName: call.toolName,
+  input: call.input,
+});
+
+const toToolResultPart = (result: {
+  toolCallId: string;
+  toolName: string;
+  output: unknown;
+}): ToolResultPart => ({
+  type: 'tool-result',
+  toolCallId: result.toolCallId,
+  toolName: result.toolName,
+  output: { type: 'json', value: result.output as JSONValue },
+});
 
 export const toolCall: StateHandler = async (ctx) => {
   if (!ctx.lastResult) {
@@ -28,7 +51,7 @@ export const toolCall: StateHandler = async (ctx) => {
   await Promise.all([
     ...result.toolCalls.map((call) =>
       RedisToolCallService.addToolCall({
-        call,
+        call: toToolCallPart(call),
         serverId,
         channelId,
         timestamp,
@@ -36,7 +59,7 @@ export const toolCall: StateHandler = async (ctx) => {
     ),
     ...result.toolResults.map((toolResult) =>
       RedisToolCallService.addToolResult({
-        result: toolResult,
+        result: toToolResultPart(toolResult),
         serverId,
         channelId,
         timestamp,
