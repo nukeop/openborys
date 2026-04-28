@@ -13,6 +13,7 @@ const envSchema = z.object({
   REDIS_URL: z.url(),
 
   REPLICATE_API_TOKEN: z.string().min(1),
+  TAVILY_API_KEY: z.string().min(1),
 
   AWS_ACCESS_KEY_ID: z.string().min(1),
   AWS_SECRET_ACCESS_KEY: z.string().min(1),
