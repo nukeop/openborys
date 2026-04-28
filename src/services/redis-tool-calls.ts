@@ -1,23 +1,17 @@
-import type {
-  ToolCallPart,
-  ToolResultPart,
-  ToolSet,
-  TypedToolCall,
-  TypedToolResult,
-} from 'ai';
+import type { ToolCallPart, ToolResultPart } from 'ai';
 import { RedisService } from './redis';
 
 const TTL_SECONDS = 604800; // 7 days
 
 export type StoredToolCall = {
-  call: ToolCallPart | TypedToolCall<ToolSet>;
+  call: ToolCallPart;
   channelId: string;
   serverId: string;
   timestamp: number;
 };
 
 export type StoredToolResult = {
-  result: ToolResultPart | TypedToolResult<ToolSet>;
+  result: ToolResultPart;
   channelId: string;
   serverId: string;
   timestamp: number;

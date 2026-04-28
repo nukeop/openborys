@@ -3,8 +3,14 @@ import type { Message as DiscordMessage } from 'discord.js';
 import { DISCORD_CONFIG } from '../../config/platforms/discord';
 import {
   createAssistantMessage,
+  createToolResult,
   createUserMessage,
 } from '../../services/ai-utils';
+import {
+  type StoredToolCall,
+  type StoredToolResult,
+  RedisToolCallService,
+} from '../../services/redis-tool-calls';
 import { SystemPromptService } from '../../services/system-prompt';
 import { formatTimestamp } from '../../utils/time';
 
@@ -53,6 +59,29 @@ export const mapDiscordMessageToModelMessages = (
   return modelMessages;
 };
 
+type TimestampedMessages = {
+  timestamp: number;
+  messages: ModelMessage[];
+};
+
+const discordToTimestamped = (
+  message: DiscordMessage,
+): TimestampedMessages => ({
+  timestamp: message.createdTimestamp,
+  messages: mapDiscordMessageToModelMessages(message),
+});
+
+const toolPairToTimestamped = (
+  call: StoredToolCall,
+  result: StoredToolResult,
+): TimestampedMessages => ({
+  timestamp: call.timestamp,
+  messages: [
+    createAssistantMessage({ content: [call.call] }),
+    createToolResult({ content: [result.result] }),
+  ],
+});
+
 export const getLastMessages = async (
   message: DiscordMessage,
   contextWindowSize: number,
@@ -60,13 +89,96 @@ export const getLastMessages = async (
   const rawMessages = await message.channel.messages.fetch({
     limit: contextWindowSize,
   });
-  const messages = rawMessages
-    .reverse()
-    .values()
-    .flatMap(mapDiscordMessageToModelMessages)
-    .toArray();
+  const sorted = rawMessages.reverse();
 
-  return messages;
+  const first = sorted.first();
+  const last = sorted.last();
+
+  if (!first || !last) {
+    return [];
+  }
+
+  const serverId = message.guildId ?? 'dm';
+  const channelId = message.channelId;
+
+  const toolPairs = await getToolMessages(
+    serverId,
+    channelId,
+    first.createdTimestamp,
+    last.createdTimestamp,
+  );
+
+  const discordEntries = sorted.map(discordToTimestamped).values().toArray();
+  const toolEntries = toolPairs.map(({ call, result }) =>
+    toolPairToTimestamped(call, result),
+  );
+
+  return [...discordEntries, ...toolEntries]
+    .sort((a, b) => a.timestamp - b.timestamp)
+    .flatMap((entry) => entry.messages);
+};
+
+type ToolPair = { call: StoredToolCall; result: StoredToolResult };
+
+// Fetches all calls and results within a given time range.
+// For every call or result that doesn't have its pair in the initial fetch, we fetch the missing counterpart by id.
+// This is needed because APIs will reject tool calls without results or vice versa.
+const getToolMessages = async (
+  serverId: string,
+  channelId: string,
+  from: number,
+  to: number,
+): Promise<ToolPair[]> => {
+  const calls = await RedisToolCallService.getCallsInRange(
+    serverId,
+    channelId,
+    from,
+    to,
+  );
+  const results = await RedisToolCallService.getResultsInRange(
+    serverId,
+    channelId,
+    from,
+    to,
+  );
+
+  const unpairedCalls = calls.filter(
+    (call) =>
+      !results.some(
+        (result) => result.result.toolCallId === call.call.toolCallId,
+      ),
+  );
+  const unpairedResults = results.filter(
+    (result) =>
+      !calls.some((call) => call.call.toolCallId === result.result.toolCallId),
+  );
+
+  const missingCalls = await Promise.all(
+    unpairedResults.map((result) =>
+      RedisToolCallService.getToolCall(result.result.toolCallId),
+    ),
+  );
+  const missingResults = await Promise.all(
+    unpairedCalls.map((call) =>
+      RedisToolCallService.getToolResult(call.call.toolCallId),
+    ),
+  );
+
+  const allCalls = [...calls, ...missingCalls].filter(
+    Boolean,
+  ) as StoredToolCall[];
+  const allResults = [...results, ...missingResults].filter(
+    Boolean,
+  ) as StoredToolResult[];
+
+  return allCalls
+    .map((call) => ({
+      call,
+      result: allResults.find(
+        (result) => result.result.toolCallId === call.call.toolCallId,
+      ),
+    }))
+    .filter((pair): pair is ToolPair => pair.result !== undefined);
 };
 
 export const getDiscordContext = async (message: DiscordMessage) => {

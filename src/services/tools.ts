@@ -1,6 +1,6 @@
 import type { Tool } from 'ai';
 
-type ToolWithMeta<INPUT, OUTPUT> = {
+export type ToolWithMeta<INPUT, OUTPUT> = {
   id: string;
   name: string;
   isAlwaysAvailable: boolean;
