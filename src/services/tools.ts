@@ -6,7 +6,8 @@ export type ToolWithMeta<INPUT, OUTPUT> = {
   emoji: string;
   isAlwaysAvailable: boolean;
   formatArgs: (args: INPUT) => string;
-  tool: Tool<INPUT, OUTPUT>;
+  execute: (input: INPUT) => Promise<OUTPUT>;
+  tool: Tool<INPUT, any>;
 };
 
 export class ToolService {

@@ -19,6 +19,13 @@ export const thinking: StateHandler = async (ctx) => {
   }
 
   if (result.finishReason === 'tool-calls') {
+    ctx.pendingToolCalls = result.toolCalls.map((call) => ({
+      type: 'tool-call' as const,
+      toolCallId: call.toolCallId,
+      toolName: call.toolName,
+      input: call.input,
+    }));
+    ctx.messages.push(...result.response.messages);
     return { type: 'tool-call' };
   }
 
