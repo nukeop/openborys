@@ -1,11 +1,14 @@
+import { getLogger } from '@logtape/logtape';
+import type { Message } from 'discord.js';
 import { messageReceived } from './handlers/message-received';
+import { thinking } from './handlers/thinking';
 import type { AgentState, RunContext, State, StateHandler } from './types';
+
+const logger = getLogger(['OpenBorys', 'Agent', 'Discord']);
 
 const handlers: Record<State, StateHandler> = {
   'message-received': messageReceived,
-  thinking: async (_ctx) => {
-    return null;
-  },
+  thinking,
   'tool-call': async (_ctx) => {
     return null;
   },
@@ -17,15 +20,24 @@ const handlers: Record<State, StateHandler> = {
   },
 };
 
-export const runAgent = async (
-  state: AgentState,
-  ctx: RunContext,
-): Promise<void> => {
+const run = async (state: AgentState, ctx: RunContext): Promise<void> => {
   const next = await handlers[state.type](ctx);
 
   if (!next) {
     return;
   }
 
-  return runAgent(next, ctx);
+  return run(next, ctx);
+};
+
+export const runAgent = async (source: Message): Promise<void> => {
+  logger.debug('Starting Discord agent run');
+
+  const ctx: RunContext = {
+    messages: [],
+    stepCount: 0,
+    source,
+  };
+
+  return run({ type: 'message-received' }, ctx);
 };
