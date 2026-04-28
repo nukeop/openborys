@@ -41,7 +41,7 @@ const run = async () => {
     mode: env.NODE_ENV,
   });
   const prompts = await loadPrompts();
-  SystemPromptService.setSystemPrompt(prompts);
+  SystemPromptService.setBasePrompt(prompts);
   registerTools();
   logger.info('Initializing OpenBorys on {platform}', {
     platform,
