@@ -18,8 +18,12 @@ export class FriendsService {
   };
 
   static getFriendsContext = (): string => {
-    return FriendsService.#friends
+    if (!FriendsService.#friends) {
+      return '';
+    }
+    const list = FriendsService.#friends
       .map((friend) => `- ${friend.name}: ${friend.description}`)
       .join('\n');
+    return `<friends>\n${list}\n</friends>`;
   };
 }
