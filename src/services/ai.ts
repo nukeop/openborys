@@ -40,6 +40,13 @@ export const ai = {
       model: activeModel,
     } as Parameters<typeof generateText>[0]);
   },
+  generateTextRaw: (args: GenerateArgs) => {
+    logger.info('Generating text (raw)...');
+    return generateText({
+      ...args,
+      model: activeModel,
+    } as Parameters<typeof generateText>[0]);
+  },
   streamText: (args: StreamArgs) => {
     logger.info('Streaming text...');
     return streamText({

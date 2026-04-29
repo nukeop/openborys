@@ -1,6 +1,6 @@
-import { tool } from 'ai';
-import { tavily } from '@tavily/core';
 import { getLogger } from '@logtape/logtape';
+import { tavily } from '@tavily/core';
+import { tool } from 'ai';
 import { env } from '../../environment';
 import type { ToolWithMeta } from '../../services/tools';
 import { webFetchInputSchema } from './schema';

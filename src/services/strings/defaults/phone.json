@@ -1,0 +1,7 @@
+{
+  "toolName": "Phone",
+  "toolDescription": "Send a message to your friends or anyone and get a reply.",
+  "systemPrompt": "{botName} is sending you a text message via phone. The recipient, and the character you are roleplaying as, is: {contact}.\n\n{descriptions}\n\nReply to {botName} as a text message, responding as the above-mentioned character or characters.",
+  "noResponse": "No response.",
+  "callFailed": "Call failed: {error}"
+}

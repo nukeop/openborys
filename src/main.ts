@@ -8,6 +8,7 @@ import { loadEnvironment } from './environment';
 import { FriendsService, loadFriends } from './friends';
 import { initLogger } from './logger';
 import { loadPrompts } from './prompts';
+import { StringsService } from './services/strings';
 import { SystemPromptService } from './services/system-prompt';
 import { registerTools } from './tools';
 
@@ -43,6 +44,7 @@ const run = async () => {
   });
   const prompts = await loadPrompts();
   const friends = await loadFriends();
+  await StringsService.loadStrings();
   FriendsService.setFriends(friends);
   const friendsContext = FriendsService.getFriendsContext();
   SystemPromptService.setBasePrompt(

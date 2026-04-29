@@ -23,6 +23,9 @@ const envSchema = z.object({
 
   PROMPTS_PREFIX: z.string().min(1).default('prompts/'),
   FRIENDS_PREFIX: z.string().min(1).default('friends/'),
+  TOOL_STRINGS_PREFIX: z.string().min(1).default('tool-strings/'),
+
+  TZ: z.string().min(1).default('UTC'),
 
   QDRANT_API_KEY: z.string().min(1),
   QDRANT_URL: z.url(),
@@ -30,6 +33,7 @@ const envSchema = z.object({
   QDRANT_BOT_NAME: z.string().min(1),
 
   OPENAI_API_KEY: z.string().min(1),
+  BOT_NAME: z.string().min(1),
 });
 
 export type Environment = z.infer<typeof envSchema>;
