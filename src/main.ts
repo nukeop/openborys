@@ -5,6 +5,7 @@ import { run as runDiscord } from './clients/discord/discord';
 import { run as runMatrix } from './clients/matrix/matrix';
 import { run as runTui } from './clients/tui/tui';
 import { loadEnvironment } from './environment';
+import { FriendsService, loadFriends } from './friends';
 import { initLogger } from './logger';
 import { loadPrompts } from './prompts';
 import { SystemPromptService } from './services/system-prompt';
@@ -41,7 +42,12 @@ const run = async () => {
     mode: env.NODE_ENV,
   });
   const prompts = await loadPrompts();
-  SystemPromptService.setBasePrompt(prompts);
+  const friends = await loadFriends();
+  FriendsService.setFriends(friends);
+  const friendsContext = FriendsService.getFriendsContext();
+  SystemPromptService.setBasePrompt(
+    [prompts, friendsContext].filter(Boolean).join('\n\n'),
+  );
   registerTools();
   logger.info('Initializing OpenBorys on {platform}', {
     platform,

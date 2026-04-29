@@ -22,6 +22,7 @@ const envSchema = z.object({
   AWS_BUCKET: z.string().min(1),
 
   PROMPTS_PREFIX: z.string().min(1).default('prompts/'),
+  FRIENDS_PREFIX: z.string().min(1).default('friends/'),
 
   QDRANT_API_KEY: z.string().min(1),
   QDRANT_URL: z.url(),

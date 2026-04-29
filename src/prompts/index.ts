@@ -1,12 +1,19 @@
+import { getLogger } from '@logtape/logtape';
 import { S3Client } from 'bun';
 import { env } from '../environment';
-import { getLogger } from '@logtape/logtape';
 
 const logger = getLogger(['OpenBorys', 'Discord', 'Prompts']);
 
 export async function loadPrompts() {
   logger.info('Loading prompts from block storage...');
-  const {AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_ENDPOINT_URL_S3, AWS_REGION, AWS_BUCKET, PROMPTS_PREFIX} = env();
+  const {
+    AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY,
+    AWS_ENDPOINT_URL_S3,
+    AWS_REGION,
+    AWS_BUCKET,
+    PROMPTS_PREFIX,
+  } = env();
   const s3 = new S3Client({
     accessKeyId: AWS_ACCESS_KEY_ID,
     secretAccessKey: AWS_SECRET_ACCESS_KEY,
