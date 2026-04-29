@@ -4,7 +4,7 @@ export const shouldReply = async (
   client: Client,
   message: Message,
 ): Promise<boolean> => {
-  if (message.author.bot) {
+  if (message.author.id === message.client.user.id) {
     return false;
   }
   if (!client.user) {
