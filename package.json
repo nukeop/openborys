@@ -21,8 +21,10 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.71",
+    "@ai-sdk/openai": "^3.0.53",
     "@logtape/logtape": "^2.0.5",
     "@logtape/pretty": "^2.0.5",
+    "@qdrant/js-client-rest": "^1.17.0",
     "@tavily/core": "^0.7.2",
     "ai": "^6.0.168",
     "discord-api-types": "^0.38.47",

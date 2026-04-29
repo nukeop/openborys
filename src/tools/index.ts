@@ -1,9 +1,10 @@
 import { ToolService } from '../services/tools';
 import { bashTool } from './bash';
-import { webSearchTool } from './web-search';
-import { webFetchTool } from './web-fetch';
 import { loadSkillTool } from './load-skill';
+import { rememberTool } from './remember';
 import { unloadSkillTool } from './unload-skill';
+import { webFetchTool } from './web-fetch';
+import { webSearchTool } from './web-search';
 
 export const registerTools = () => {
   ToolService.registerTool(bashTool);
@@ -11,4 +12,5 @@ export const registerTools = () => {
   ToolService.registerTool(webFetchTool);
   ToolService.registerTool(loadSkillTool);
   ToolService.registerTool(unloadSkillTool);
+  ToolService.registerTool(rememberTool);
 };

@@ -22,6 +22,13 @@ const envSchema = z.object({
   AWS_BUCKET: z.string().min(1),
 
   PROMPTS_PREFIX: z.string().min(1).default('prompts/'),
+
+  QDRANT_API_KEY: z.string().min(1),
+  QDRANT_URL: z.url(),
+  QDRANT_COLLECTION: z.string().min(1),
+  QDRANT_BOT_NAME: z.string().min(1),
+
+  OPENAI_API_KEY: z.string().min(1),
 });
 
 export type Environment = z.infer<typeof envSchema>;
