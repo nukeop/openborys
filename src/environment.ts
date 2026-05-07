@@ -24,6 +24,11 @@ const envSchema = z.object({
   PROMPTS_PREFIX: z.string().min(1).default('prompts/'),
   FRIENDS_PREFIX: z.string().min(1).default('friends/'),
   TOOL_STRINGS_PREFIX: z.string().min(1).default('tool-strings/'),
+  ADMIN_USERS_PREFIX: z.string().min(1).default('admin-users/'),
+
+  ADMIN_PORT: z.coerce.number().int().positive().default(3000),
+  ADMIN_SESSION_SECRET: z.string().min(16),
+  ADMIN_SESSION_TTL_HOURS: z.coerce.number().int().positive().default(24),
 
   TZ: z.string().min(1).default('UTC'),
 

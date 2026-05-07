@@ -1,6 +1,7 @@
 import { getLogger } from '@logtape/logtape';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
+import { startAdminServer } from './admin/server';
 import { run as runDiscord } from './clients/discord/discord';
 import { run as runMatrix } from './clients/matrix/matrix';
 import { run as runTui } from './clients/tui/tui';
@@ -51,6 +52,7 @@ const run = async () => {
     [prompts, friendsContext].filter(Boolean).join('\n\n'),
   );
   registerTools();
+  await startAdminServer();
   logger.info('Initializing OpenBorys on {platform}', {
     platform,
   });
