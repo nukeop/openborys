@@ -22,6 +22,9 @@
       },
       "complexity": {
         "noStaticOnlyClass": "off"
+      },
+      "nursery": {
+        "useSortedClasses": "error"
       }
     }
   },
@@ -29,6 +32,17 @@
     "formatter": {
       "quoteStyle": "single",
       "semicolons": "always"
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    },
+    "linter": {
+      "enabled": true
+    },
+    "formatter": {
+      "enabled": true
     }
   },
   "assist": {

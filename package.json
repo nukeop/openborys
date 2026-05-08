@@ -16,7 +16,9 @@
     "@types/bun": "latest",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@types/yargs": "^17.0.35"
+    "@types/yargs": "^17.0.35",
+    "bun-plugin-tailwind": "^0.1.2",
+    "tailwindcss": "^4.2.4"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -24,6 +26,8 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.71",
     "@ai-sdk/openai": "^3.0.53",
+    "@fontsource-variable/jetbrains-mono": "^5.2.8",
+    "@fontsource-variable/sora": "^5.2.8",
     "@logtape/logtape": "^2.0.5",
     "@logtape/pretty": "^2.0.5",
     "@qdrant/js-client-rest": "^1.17.0",
