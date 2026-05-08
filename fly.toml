@@ -12,6 +12,12 @@ primary_region = 'fra'
   strategy = "immediate"
   max_unavailable = 1
 
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+
 [[vm]]
   memory = '512mb'
   cpus = 1
