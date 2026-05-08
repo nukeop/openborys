@@ -11,6 +11,7 @@ import { loadPrompts } from './prompts';
 import { StringsService } from './services/strings';
 import { SystemPromptService } from './services/system-prompt';
 import { registerTools } from './tools';
+import { startAdminServer } from './web/server';
 
 const logger = getLogger(['OpenBorys', 'main']);
 const PLATFORMS = ['matrix', 'discord', 'tui'] as const;
@@ -51,6 +52,7 @@ const run = async () => {
     [prompts, friendsContext].filter(Boolean).join('\n\n'),
   );
   registerTools();
+  startAdminServer();
   logger.info('Initializing OpenBorys on {platform}', {
     platform,
   });
