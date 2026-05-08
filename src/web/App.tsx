@@ -1,11 +1,21 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Route, Switch } from 'wouter';
+import { Home } from './pages/Home';
+
+const queryClient = new QueryClient();
 
 export function App() {
   return (
-    <Switch>
-      <Route path="/">Root</Route>
+    <QueryClientProvider client={queryClient}>
+      <Switch>
+        <Route path="/">
+          <Home />
+        </Route>
 
-      <Route>404</Route>
-    </Switch>
+        <Route>
+          <div className="p-8 text-zinc-500">404</div>
+        </Route>
+      </Switch>
+    </QueryClientProvider>
   );
 }

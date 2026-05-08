@@ -4,8 +4,6 @@ import { getActive } from '../../services/ai';
 
 export function getIntrospection() {
   const cpus = os.cpus();
-  const totalMemory = os.totalmem();
-  const freeMemory = os.freemem();
   const { provider, model } = getActive();
 
   return {
@@ -21,13 +19,10 @@ export function getIntrospection() {
       cores: cpus.length,
     },
     memory: {
-      totalBytes: totalMemory,
-      freeBytes: freeMemory,
-      usagePercent: Math.round((1 - freeMemory / totalMemory) * 100),
+      total: os.totalmem(),
+      free: os.freemem(),
     },
-    uptime: {
-      seconds: os.uptime(),
-    },
+    uptimeSeconds: os.uptime(),
     ai: {
       provider,
       model,
