@@ -1,6 +1,6 @@
 import { getLogger } from '@logtape/logtape';
 import { getIntrospection } from './api/introspect';
-import { getSkill, getSkills } from './api/skills';
+import { getSkill, getSkills, loadSkill, unloadSkill } from './api/skills';
 import index from './index.html';
 
 const logger = getLogger(['OpenBorys', 'web']);
@@ -20,11 +20,27 @@ export function startAdminServer() {
         GET() {
           return Response.json(getSkills());
         },
+        async POST(req) {
+          const { url } = (await req.json()) as { url: string };
+          try {
+            const skill = await loadSkill(url);
+            return Response.json(skill, { status: 201 });
+          } catch (error) {
+            const message =
+              error instanceof Error ? error.message : String(error);
+            return Response.json({ error: message }, { status: 400 });
+          }
+        },
       },
       '/api/skills/:name': (req) => {
         const name = decodeURIComponent(req.params.name);
-        const skill = getSkill(name);
-        return Response.json(skill);
+
+        if (req.method === 'DELETE') {
+          unloadSkill(name);
+          return new Response(null, { status: 204 });
+        }
+
+        return Response.json(getSkill(name));
       },
       '/*': index,
     },
