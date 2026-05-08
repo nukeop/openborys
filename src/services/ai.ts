@@ -38,6 +38,7 @@ export const ai = {
       ...args,
       tools: toAITools(ToolService.getAlwaysAvailableTools()),
       model: activeModel,
+      allowSystemInMessages: true,
     } as Parameters<typeof generateText>[0]);
   },
   generateTextRaw: (args: GenerateArgs) => {
@@ -45,6 +46,7 @@ export const ai = {
     return generateText({
       ...args,
       model: activeModel,
+      allowSystemInMessages: true,
     } as Parameters<typeof generateText>[0]);
   },
   streamText: (args: StreamArgs) => {
@@ -53,6 +55,7 @@ export const ai = {
       ...args,
       tools: toAITools(ToolService.getAlwaysAvailableTools()),
       model: activeModel,
+      allowSystemInMessages: true,
     } as Parameters<typeof streamText>[0]);
   },
 };

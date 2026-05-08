@@ -1,4 +1,6 @@
-import type { Introspection } from '../api/introspect';
+import { useQuery } from '@tanstack/react-query';
+import { introspectQuery } from '../queries/introspect';
+import { CardSkeleton } from './CardSkeleton';
 import { Stat } from './Stat';
 
 const bytes = new Intl.NumberFormat('en', {
@@ -14,13 +16,19 @@ const percent = new Intl.NumberFormat('en', {
   maximumFractionDigits: 0,
 });
 
-export function IntrospectCard({ data }: { data: Introspection }) {
+export function IntrospectCard() {
+  const { data, isPending } = useQuery(introspectQuery);
+
+  if (isPending || !data) {
+    return <CardSkeleton />;
+  }
+
   const usageRatio = 1 - data.memory.free / data.memory.total;
 
   return (
     <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
       <div className="mb-6 flex items-center gap-3">
-        <div className="h-2 w-2 rounded-full bg-teal-400 shadow-[0_0_6px_theme(colors.teal.400)]" />
+        <div className="h-2 w-2 rounded-full bg-teal-400 shadow-[0_0_6px_var(--color-teal-400)]" />
         <h2 className="font-semibold text-zinc-100">{data.name}</h2>
         <span className="rounded-full bg-zinc-800 px-2 py-0.5 font-mono text-xs text-zinc-400">
           {data.environment}

@@ -1,5 +1,6 @@
 import { getLogger } from '@logtape/logtape';
 import { getIntrospection } from './api/introspect';
+import { getSkill, getSkills } from './api/skills';
 import index from './index.html';
 
 const logger = getLogger(['OpenBorys', 'web']);
@@ -14,6 +15,16 @@ export function startAdminServer() {
         GET() {
           return Response.json(getIntrospection());
         },
+      },
+      '/api/skills': {
+        GET() {
+          return Response.json(getSkills());
+        },
+      },
+      '/api/skills/:name': (req) => {
+        const name = decodeURIComponent(req.params.name);
+        const skill = getSkill(name);
+        return Response.json(skill);
       },
       '/*': index,
     },
