@@ -6,6 +6,7 @@ import { FriendsService } from '../../friends';
 import { ai } from '../../services/ai';
 import { StringsService } from '../../services/strings';
 import type { ToolWithMeta } from '../../services/tools';
+import { errorMessage } from '../../utils/error';
 import { PhoneMessageCache } from './message-cache';
 import { phoneInputSchema } from './schema';
 import type { PhoneInput } from './types';
@@ -101,10 +102,9 @@ export function createPhoneTool(): ToolWithMeta<PhoneInput, string> {
 
         return result;
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        logger.error('Phone call failed: {error}', { error: errorMessage });
-        return interpolate(strings.callFailed, { error: errorMessage });
+        const msg = errorMessage(error);
+        logger.error('Phone call failed: {error}', { error: msg });
+        return interpolate(strings.callFailed, { error: msg });
       }
     },
     tool: tool({

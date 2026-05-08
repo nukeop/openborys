@@ -1,4 +1,5 @@
 import { getLogger } from '@logtape/logtape';
+import { errorMessage } from '../utils/error';
 import { getIntrospection } from './api/introspect';
 import { getSkill, getSkills, loadSkill, unloadSkill } from './api/skills';
 import index from './index.html';
@@ -26,9 +27,10 @@ export function startAdminServer() {
             const skill = await loadSkill(url);
             return Response.json(skill, { status: 201 });
           } catch (error) {
-            const message =
-              error instanceof Error ? error.message : String(error);
-            return Response.json({ error: message }, { status: 400 });
+            return Response.json(
+              { error: errorMessage(error) },
+              { status: 400 },
+            );
           }
         },
       },

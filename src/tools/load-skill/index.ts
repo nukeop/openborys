@@ -3,6 +3,7 @@ import { getLogger } from '@logtape/logtape';
 import type { ToolWithMeta } from '../../services/tools';
 import { SystemPromptService } from '../../services/system-prompt';
 import { parseSkill } from '../../services/skills';
+import { errorMessage } from '../../utils/error';
 import { loadSkillInputSchema } from './schema';
 import type { LoadSkillInput } from './types';
 
@@ -29,8 +30,7 @@ export const loadSkillTool: ToolWithMeta<LoadSkillInput, string> = {
 
       return `Loaded skill "${skill.name}": ${skill.description}`;
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      return `Failed to load skill: ${message}`;
+      return `Failed to load skill: ${errorMessage(error)}`;
     }
   },
   tool: tool({

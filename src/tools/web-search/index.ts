@@ -3,6 +3,7 @@ import { tavily } from '@tavily/core';
 import { getLogger } from '@logtape/logtape';
 import { env } from '../../environment';
 import type { ToolWithMeta } from '../../services/tools';
+import { errorMessage } from '../../utils/error';
 import { webSearchInputSchema } from './schema';
 import type { WebSearchInput, SearchResult, WebSearchResponse } from './types';
 
@@ -42,8 +43,7 @@ export const webSearchTool: ToolWithMeta<WebSearchInput, string> = {
 
       return JSON.stringify(payload);
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      return `Web search failed: ${message}`;
+      return `Web search failed: ${errorMessage(error)}`;
     }
   },
   tool: tool({

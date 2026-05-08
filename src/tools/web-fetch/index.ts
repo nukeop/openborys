@@ -3,6 +3,7 @@ import { tavily } from '@tavily/core';
 import { tool } from 'ai';
 import { env } from '../../environment';
 import type { ToolWithMeta } from '../../services/tools';
+import { errorMessage } from '../../utils/error';
 import { webFetchInputSchema } from './schema';
 import type { WebFetchInput } from './types';
 
@@ -37,8 +38,7 @@ export const webFetchTool: ToolWithMeta<WebFetchInput, string> = {
 
       return result.rawContent;
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      return `Web fetch failed: ${message}`;
+      return `Web fetch failed: ${errorMessage(error)}`;
     }
   },
   tool: tool({
