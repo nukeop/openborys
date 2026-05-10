@@ -15,6 +15,9 @@ let activeProvider: Provider = 'anthropic';
 let activeModelName = 'claude-haiku-4-5';
 let activeModel: LanguageModel = factories[activeProvider](activeModelName);
 
+let cheapProvider: Provider = 'anthropic';
+let cheapModelName = 'claude-haiku-4-5';
+
 export const setActive = (provider: Provider, model: string): void => {
   activeProvider = provider;
   activeModelName = model;
@@ -26,12 +29,24 @@ export const getActive = (): { provider: Provider; model: string } => ({
   model: activeModelName,
 });
 
+export const setCheap = (provider: Provider, model: string): void => {
+  cheapProvider = provider;
+  cheapModelName = model;
+};
+
+export const getCheap = (): { provider: Provider; model: string } => ({
+  provider: cheapProvider,
+  model: cheapModelName,
+});
+
 type GenerateArgs = Omit<Parameters<typeof generateText>[0], 'model'>;
 type StreamArgs = Omit<Parameters<typeof streamText>[0], 'model'>;
 
 export const ai = {
   setActive,
   getActive,
+  setCheap,
+  getCheap,
   generateText: (args: GenerateArgs) => {
     logger.info('Generating text...');
     return generateText({

@@ -1,10 +1,11 @@
 import os from 'node:os';
 import { env } from '../../environment';
-import { getActive } from '../../services/ai';
+import { getActive, getCheap } from '../../services/ai';
 
 export function getIntrospection() {
   const cpus = os.cpus();
   const { provider, model } = getActive();
+  const { provider: cheapProvider, model: cheapModel } = getCheap();
 
   return {
     name: env().BOT_NAME,
@@ -26,6 +27,8 @@ export function getIntrospection() {
     ai: {
       provider,
       model,
+      cheapProvider,
+      cheapModel,
     },
   };
 }

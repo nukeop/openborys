@@ -41,6 +41,10 @@ export function IntrospectCard() {
           value={`${data.ai.provider} / ${data.ai.model}`}
         />
         <Stat
+          label="Cheap model"
+          value={`${data.ai.cheapProvider} / ${data.ai.cheapModel}`}
+        />
+        <Stat
           label="Platform"
           value={`${data.runtime.platform} ${data.runtime.arch}`}
         />
