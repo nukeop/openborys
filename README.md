@@ -55,6 +55,20 @@ States:
 5. Sending Message - Sends message to the Discord channel. Terminal state.
 6. Error - In case of unexpected failures. Terminal state.
 
+## Tools
+
+The agent has access to these tools during a conversation:
+
+| Tool | Description |
+| --- | --- |
+| Bash | Runs shell commands via Anthropic's bash tool |
+| Web Search | Searches the web via Tavily |
+| Web Fetch | Extracts page contents from a URL via Tavily |
+| Remember | Saves a piece of text to Qdrant as a vector embedding for long-term memory |
+| Phone | Sends a message to a "contact" (another LLM persona), with conversation history |
+| Load Skill | Fetches a SKILL.md from a URL and injects its instructions into the system prompt |
+| Unload Skill | Removes a previously loaded skill from the system prompt |
+
 ## License
 
 AGPL-3.0
