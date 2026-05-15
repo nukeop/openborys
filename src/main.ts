@@ -8,6 +8,7 @@ import { loadEnvironment } from './environment';
 import { FriendsService, loadFriends } from './friends';
 import { initLogger } from './logger';
 import { loadPrompts } from './prompts';
+import { EmbeddingsService } from './services/embeddings';
 import { StringsService } from './services/strings';
 import { SystemPromptService } from './services/system-prompt';
 import { registerTools } from './tools';
@@ -52,6 +53,7 @@ const run = async () => {
     [prompts, friendsContext].filter(Boolean).join('\n\n'),
   );
   registerTools();
+  await EmbeddingsService.ensureIndexes();
   startAdminServer();
   logger.info('Initializing OpenBorys on {platform}', {
     platform,

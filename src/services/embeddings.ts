@@ -6,6 +6,12 @@ import { env } from '../environment';
 
 const logger = getLogger(['OpenBorys', 'Service', 'Embeddings']);
 
+type MemoryEmbedding = {
+  'bot-id': string;
+  text: string;
+  'created-at': string;
+};
+
 export class EmbeddingsService {
   static #client: QdrantClient;
 
@@ -29,6 +35,47 @@ export class EmbeddingsService {
       value: text,
     });
     return result.embedding;
+  }
+
+  static async ensureIndexes(): Promise<void> {
+    const collection = env().QDRANT_COLLECTION;
+    await EmbeddingsService.client().createPayloadIndex(collection, {
+      field_name: 'bot-id',
+      field_schema: 'keyword',
+      wait: true,
+    });
+    logger.info('Payload index on "bot-id" ensured for {collection}', {
+      collection,
+    });
+  }
+
+  static async search(query: string, limit = 5): Promise<string[]> {
+    const vector = await EmbeddingsService.embedding(query);
+
+    logger.info(
+      'Searching Qdrant (collection={collection}, bot={bot}, dims={dims}, limit={limit})',
+      {
+        collection: env().QDRANT_COLLECTION,
+        bot: env().QDRANT_BOT_NAME,
+        dims: vector.length,
+        limit,
+        query,
+      },
+    );
+
+    const results = await EmbeddingsService.client().search(
+      env().QDRANT_COLLECTION,
+      {
+        vector,
+        limit,
+        with_payload: true,
+        filter: {
+          must: [{ key: 'bot-id', match: { value: env().QDRANT_BOT_NAME } }],
+        },
+      },
+    );
+
+    return results.map((point) => (point.payload as MemoryEmbedding)?.text);
   }
 
   static async saveEmbedding(text: string) {

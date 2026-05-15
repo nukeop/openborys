@@ -1,6 +1,7 @@
 import type { JSONValue, ToolResultPart } from 'ai';
 import { RedisToolCallService } from '../../../services/redis-tool-calls';
 import { ToolService } from '../../../services/tools';
+import { errorMessage } from '../../../utils/error';
 import type { StateHandler } from '../types';
 
 export const executingTool: StateHandler = async (ctx) => {
@@ -11,7 +12,7 @@ export const executingTool: StateHandler = async (ctx) => {
   try {
     output = await tool.execute(call.input);
   } catch (err) {
-    output = err instanceof Error ? err.message : String(err);
+    output = errorMessage(err);
   }
 
   const resultPart: ToolResultPart = {
