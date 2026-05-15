@@ -6,10 +6,11 @@ import {
   createToolResult,
   createUserMessage,
 } from '../../services/ai-utils';
+import { EmbeddingsService } from '../../services/embeddings';
 import {
+  RedisToolCallService,
   type StoredToolCall,
   type StoredToolResult,
-  RedisToolCallService,
 } from '../../services/redis-tool-calls';
 import { SystemPromptService } from '../../services/system-prompt';
 import { formatTimestamp } from '../../utils/time';
@@ -181,12 +182,39 @@ const getToolMessages = async (
     .filter((pair): pair is ToolPair => pair.result !== undefined);
 };
 
-export const getDiscordContext = async (message: DiscordMessage) => {
-  const systemPrompt = SystemPromptService.getSystemPrompt();
-  const context = await getLastMessages(
-    message,
-    DISCORD_CONFIG.contextSize.chat,
+const getRelevantMemories = async (
+  message: DiscordMessage,
+): Promise<string[]> => {
+  const recent = await message.channel.messages.fetch({
+    limit: DISCORD_CONFIG.contextSize.memories,
+  });
+  const text = recent
+    .map((msg) => msg.cleanContent)
+    .reverse()
+    .join('\n');
+  return EmbeddingsService.search(text);
+};
+
+const formatMemories = (memories: string[]): string => {
+  if (memories.length === 0) {
+    return '';
+  }
+
+  return (
+    '\n\n<memories>\n' +
+    memories.map((memory, ix) => `${ix + 1}. ${memory}`).join('\n') +
+    '\n</memories>'
   );
+};
+
+export const getDiscordContext = async (message: DiscordMessage) => {
+  const [context, memories] = await Promise.all([
+    getLastMessages(message, DISCORD_CONFIG.contextSize.chat),
+    getRelevantMemories(message),
+  ]);
+
+  const systemPrompt =
+    SystemPromptService.getSystemPrompt() + formatMemories(memories);
 
   return { systemPrompt, context };
 };

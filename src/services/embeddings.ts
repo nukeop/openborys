@@ -53,13 +53,12 @@ export class EmbeddingsService {
     const vector = await EmbeddingsService.embedding(query);
 
     logger.info(
-      'Searching Qdrant (collection={collection}, bot={bot}, dims={dims}, limit={limit})',
+      'Searching Qdrant... (collection={collection}, bot={bot}, dims={dims}, limit={limit})',
       {
         collection: env().QDRANT_COLLECTION,
         bot: env().QDRANT_BOT_NAME,
         dims: vector.length,
         limit,
-        query,
       },
     );
 

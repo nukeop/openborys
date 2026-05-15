@@ -13,7 +13,7 @@ export const sendingMessage: StateHandler = async (ctx) => {
   const text = ctx.lastResult?.text ?? '';
 
   if (text && ctx.source.channel.isSendable()) {
-    logger.debug('Sending message');
+    logger.debug('Sending message...');
     await ctx.source.channel.send(text);
   } else {
     logger.warn('No text to send, skipping');
