@@ -29,7 +29,7 @@ export class EmbeddingsService {
   }
 
   static async embedding(text: string) {
-    logger.debug('Generating embedding...', { text });
+    logger.debug('Generating embedding...');
     const result = await embed({
       model: openai.embedding('text-embedding-3-small'),
       value: text,

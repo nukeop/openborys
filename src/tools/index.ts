@@ -1,5 +1,6 @@
 import { ToolService } from '../services/tools';
 import { bashTool } from './bash';
+import { imageTool } from './image';
 import { loadSkillTool } from './load-skill';
 import { createPhoneTool } from './phone';
 import { recallTool } from './recall';
@@ -16,5 +17,6 @@ export const registerTools = () => {
   ToolService.registerTool(unloadSkillTool);
   ToolService.registerTool(rememberTool);
   ToolService.registerTool(recallTool);
+  ToolService.registerTool(imageTool);
   ToolService.registerTool(createPhoneTool());
 };
