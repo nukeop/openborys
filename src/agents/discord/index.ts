@@ -1,5 +1,6 @@
 import { getLogger } from '@logtape/logtape';
 import type { Message } from 'discord.js';
+import { registerDiscordTools } from '../../clients/discord/tools';
 import { ScopedToolService } from '../../services/scoped-tools';
 import { createDiscordImageTool } from '../../tools/discord-image';
 import { error } from './handlers/error';
@@ -43,7 +44,7 @@ export const runAgent = async (source: Message): Promise<void> => {
     currentToolCall: null,
   };
 
-  ScopedToolService.registerTool(createDiscordImageTool(source), source.id);
+  registerDiscordTools(source);
 
   return run({ type: 'message-received' }, ctx);
 };
