@@ -1,4 +1,5 @@
 import { getLogger } from '@logtape/logtape';
+import { ScopedToolService } from '../../../services/scoped-tools';
 import type { StateHandler } from '../types';
 
 const logger = getLogger([
@@ -19,5 +20,6 @@ export const sendingMessage: StateHandler = async (ctx) => {
     logger.warn('No text to send, skipping');
   }
 
+  ScopedToolService.clearScope(ctx.source.id);
   return null;
 };

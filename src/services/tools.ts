@@ -17,6 +17,10 @@ export class ToolService {
     ToolService.#tools.push(tool);
   };
 
+  static unregisterTool = (id: string) => {
+    ToolService.#tools = ToolService.#tools.filter((entry) => entry.id !== id);
+  };
+
   static findByIdOrName = (
     idOrName: string,
   ): ToolWithMeta<unknown, unknown> | undefined => {

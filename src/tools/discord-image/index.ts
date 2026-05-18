@@ -1,18 +1,23 @@
+import { getLogger } from '@logtape/logtape';
 import { tool } from 'ai';
+import type { Message } from 'discord.js';
 import type { ToolWithMeta } from '../../services/tools';
 import { modelOptionsDescription } from './config';
 import { imageInputSchema } from './schema';
 import type { ImageInput } from './types';
 
-export const imageTool: ToolWithMeta<ImageInput, string> = {
-  id: 'base__image',
+const logger = getLogger(['OpenBorys', 'tools', 'discord-image']);
+
+export const DISCORD_IMAGE_TOOL_ID = 'discord__image';
+
+export const createDiscordImageTool: (
+  message: Message,
+) => ToolWithMeta<ImageInput, string> = (message) => ({
+  id: `${DISCORD_IMAGE_TOOL_ID}_${message.id}`,
   name: 'Image',
   emoji: '🖍️',
   isAlwaysAvailable: true,
-  formatArgs: () => '',
-  execute: async () => {
-    return '';
-  },
+  formatArgs: (args) => args.prompt,
   tool: tool({
     description: [
       'Generate or edit images.',
@@ -24,4 +29,11 @@ export const imageTool: ToolWithMeta<ImageInput, string> = {
     ].join('\n'),
     inputSchema: imageInputSchema,
   }),
-};
+  execute: async ({ mode, imageIds, prompt, options }) => {
+    logger.info(
+      'Using Discord Image tool with mode: {mode}. Attached image ids: {imageIds}. Prompt: {prompt}',
+      { mode, imageIds, prompt, options },
+    );
+    return 'Test';
+  },
+});

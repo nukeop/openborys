@@ -1,7 +1,7 @@
 import { anthropic } from '@ai-sdk/anthropic';
 import { getLogger } from '@logtape/logtape';
 import { generateText, type LanguageModel, streamText } from 'ai';
-import { ToolService, toAITools } from './tools';
+import { ToolService, type ToolWithMeta, toAITools } from './tools';
 
 const logger = getLogger(['OpenBorys', 'Service', 'AI']);
 
@@ -32,11 +32,14 @@ type StreamArgs = Omit<Parameters<typeof streamText>[0], 'model'>;
 export const ai = {
   setActive,
   getActive,
-  generateText: (args: GenerateArgs) => {
+  generateText: (args: GenerateArgs, extraTools?: ToolWithMeta<any, any>[]) => {
     logger.info('Generating text...');
     return generateText({
       ...args,
-      tools: toAITools(ToolService.getAlwaysAvailableTools()),
+      tools: toAITools([
+        ...ToolService.getAlwaysAvailableTools(),
+        ...(extraTools ?? []),
+      ]),
       model: activeModel,
       allowSystemInMessages: true,
     } as Parameters<typeof generateText>[0]);
@@ -49,11 +52,14 @@ export const ai = {
       allowSystemInMessages: true,
     } as Parameters<typeof generateText>[0]);
   },
-  streamText: (args: StreamArgs) => {
+  streamText: (args: StreamArgs, extraTools?: ToolWithMeta<any, any>[]) => {
     logger.info('Streaming text...');
     return streamText({
       ...args,
-      tools: toAITools(ToolService.getAlwaysAvailableTools()),
+      tools: toAITools([
+        ...ToolService.getAlwaysAvailableTools(),
+        ...(extraTools ?? []),
+      ]),
       model: activeModel,
       allowSystemInMessages: true,
     } as Parameters<typeof streamText>[0]);

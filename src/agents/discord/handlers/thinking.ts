@@ -1,5 +1,6 @@
 import { getLogger } from '@logtape/logtape';
 import { ai } from '../../../services/ai';
+import { ScopedToolService } from '../../../services/scoped-tools';
 import type { StateHandler } from '../types';
 
 const logger = getLogger([
@@ -11,7 +12,10 @@ const logger = getLogger([
 ]);
 
 export const thinking: StateHandler = async (ctx) => {
-  const result = await ai.generateText({ messages: ctx.messages });
+  const result = await ai.generateText(
+    { messages: ctx.messages },
+    ScopedToolService.getToolsForScope(ctx.source.id),
+  );
   ctx.lastResult = result;
 
   if (result.finishReason === 'stop') {

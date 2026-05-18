@@ -1,12 +1,32 @@
+import { getLogger } from '@logtape/logtape';
 import type { JSONValue, ToolResultPart } from 'ai';
 import { RedisToolCallService } from '../../../services/redis-tool-calls';
+import { ScopedToolService } from '../../../services/scoped-tools';
 import { ToolService } from '../../../services/tools';
 import { errorMessage } from '../../../utils/error';
 import type { StateHandler } from '../types';
 
+const logger = getLogger([
+  'OpenBorys',
+  'Agent',
+  'Discord',
+  'EventHandlers',
+  'ExecutingTool',
+]);
+
 export const executingTool: StateHandler = async (ctx) => {
   const call = ctx.currentToolCall!;
-  const tool = ToolService.findByIdOrName(call.toolName)!;
+  let tool = ToolService.findByIdOrName(call.toolName);
+  if (!tool) {
+    tool = ScopedToolService.findToolInScope(ctx.source.id, call.toolName);
+  }
+
+  if (!tool) {
+    logger.error('Tool not found: {toolName}. This should never happen.', {
+      toolName: call.toolName,
+    });
+    throw new Error(`Tool not found: ${call.toolName}`);
+  }
 
   let output: unknown;
   try {

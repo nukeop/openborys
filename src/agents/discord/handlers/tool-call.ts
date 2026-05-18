@@ -1,6 +1,7 @@
 import { getLogger } from '@logtape/logtape';
 import { EmbedBuilder } from 'discord.js';
 import { RedisToolCallService } from '../../../services/redis-tool-calls';
+import { ScopedToolService } from '../../../services/scoped-tools';
 import { ToolService } from '../../../services/tools';
 import type { StateHandler } from '../types';
 
@@ -15,9 +16,17 @@ const logger = getLogger([
 export const toolCall: StateHandler = async (ctx) => {
   const call = ctx.pendingToolCalls.shift()!;
 
-  logger.info('Tool called: {toolName}', { toolName: call.toolName });
+  let tool = ToolService.findByIdOrName(call.toolName);
+  if (!tool) {
+    tool = ScopedToolService.findToolInScope(ctx.source.id, call.toolName);
+  }
 
-  const tool = ToolService.findByIdOrName(call.toolName)!;
+  if (!tool) {
+    logger.error('Tool not found: {toolName}. This should never happen.', {
+      toolName: call.toolName,
+    });
+    throw new Error(`Tool not found: ${call.toolName}`);
+  }
 
   if (ctx.source.channel.isSendable()) {
     const formattedArgs = tool.formatArgs(call.input as never);
