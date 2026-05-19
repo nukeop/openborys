@@ -24,7 +24,7 @@ export const shouldReply = async (
 export const findAttachments = async (
   channel: TextBasedChannel,
   attachmentIds: string[],
-): Promise<Attachment[]> => {
+): Promise<string[]> => {
   const messages = await channel.messages.fetch({
     limit: DISCORD_CONFIG.contextSize.attachments,
   });
@@ -35,5 +35,6 @@ export const findAttachments = async (
 
   return attachmentIds
     .map((id) => allAttachmentsInScope.find((a) => a.id === id))
-    .filter((a): a is Attachment => Boolean(undefined));
+    .filter((attachment): attachment is Attachment => Boolean(attachment))
+    .map((attachment) => attachment.url);
 };
