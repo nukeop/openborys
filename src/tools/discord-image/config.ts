@@ -1,4 +1,4 @@
-type GptImage2Input = {
+export type GptImage2Input = {
 	prompt: string;
 	input_images?: string[];
 	aspect_ratio?: '1:1' | '3:2' | '2:3';
@@ -9,7 +9,7 @@ type GptImage2Input = {
 	number_of_images?: number;
 };
 
-type NanoBanana2Input = {
+export type NanoBanana2Input = {
 	prompt: string;
 	image_input?: string[];
 	aspect_ratio?:
@@ -42,12 +42,14 @@ type ModelOption = {
 
 type ImageModelConfig = {
 	replicateId: `${string}/${string}`;
+	imageInputField: string;
 	options: ModelOption[];
 };
 
 export const modelConfig = {
 	'gpt-image-2': {
 		replicateId: 'openai/gpt-image-2',
+		imageInputField: 'input_images',
 		options: [
 			{
 				name: 'aspect_ratio',
@@ -83,6 +85,7 @@ export const modelConfig = {
 	},
 	'nano-banana-2': {
 		replicateId: 'google/nano-banana-2',
+		imageInputField: 'image_input',
 		options: [
 			{
 				name: 'aspect_ratio',

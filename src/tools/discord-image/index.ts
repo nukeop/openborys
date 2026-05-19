@@ -1,12 +1,19 @@
 import { getLogger } from '@logtape/logtape';
 import { tool } from 'ai';
 import type { Message } from 'discord.js';
+import Replicate from 'replicate';
+import { env } from '../../environment';
 import type { ToolWithMeta } from '../../services/tools';
 import { modelOptionsDescription } from './config';
 import { imageInputSchema } from './schema';
 import type { ImageInput } from './types';
 
 const logger = getLogger(['OpenBorys', 'tools', 'discord-image']);
+
+const replicate = new Replicate({
+  auth: env().REPLICATE_API_TOKEN,
+  fileEncodingStrategy: 'upload',
+});
 
 export const DISCORD_IMAGE_TOOL_ID = 'discord__image';
 
