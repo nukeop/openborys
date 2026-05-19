@@ -38,10 +38,11 @@ export const mapDiscordMessageToModelMessages = (
     type: 'text',
     text: `[${timestamp}]${authorPrefix}: ${message.cleanContent}`,
   };
-  const imageParts: ImagePart[] = images.map((image) => ({
-    type: 'image',
-    image: image.url,
-  }));
+  const imageParts: (TextPart | ImagePart)[] = Array.from(images.values())
+    .flatMap((image): (TextPart | ImagePart)[] => [
+      { type: 'text', text: `Image: ${image.id}` },
+      { type: 'image', image: image.url },
+    ]);
 
   if (isOwnMessage && !message.attachments.size) {
     modelMessages.push(createAssistantMessage({ content: [messagePart] }));
