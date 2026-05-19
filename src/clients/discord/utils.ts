@@ -1,4 +1,5 @@
-import type { Client, Message } from 'discord.js';
+import type { Attachment, Client, Message, TextBasedChannel } from 'discord.js';
+import { DISCORD_CONFIG } from '../../config/platforms/discord';
 
 export const shouldReply = async (
   client: Client,
@@ -18,4 +19,21 @@ export const shouldReply = async (
   }
 
   return true;
+};
+
+export const findAttachments = async (
+  channel: TextBasedChannel,
+  attachmentIds: string[],
+): Promise<Attachment[]> => {
+  const messages = await channel.messages.fetch({
+    limit: DISCORD_CONFIG.contextSize.attachments,
+  });
+
+  const allAttachmentsInScope = messages.flatMap(
+    (message) => message.attachments,
+  );
+
+  return attachmentIds
+    .map((id) => allAttachmentsInScope.find((a) => a.id === id))
+    .filter((a): a is Attachment => Boolean(undefined));
 };

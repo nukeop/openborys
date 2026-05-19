@@ -27,7 +27,6 @@ export class ScopedToolService {
     if (!tools) {
       return undefined;
     }
-    logger.info('{idOrName} {tools}', { idOrName, tools });
 
     const matchById = tools.find((entry) => entry.id === idOrName);
     if (matchById) {
