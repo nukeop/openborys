@@ -8,6 +8,7 @@ import { FriendsService } from '../friends';
 import { EmbeddingsService } from '../services/embeddings';
 import { RedisService } from '../services/redis';
 import { ToolService } from '../services/tools';
+import { errorDetail } from '../utils/error';
 import type { PluginContext, PluginFactory } from './types';
 
 const logger = getLogger(['OpenBorys', 'plugins']);
@@ -99,7 +100,9 @@ export async function loadPlugins(): Promise<void> {
 
   failed.forEach((failure) => {
     if (failure.status === 'rejected') {
-      logger.error('Failed to load plugin: {error}', { error: failure.reason });
+      logger.error('Failed to load plugin: {message}', {
+        message: errorDetail(failure.reason),
+      });
     }
   });
 
