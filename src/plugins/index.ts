@@ -2,7 +2,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { getLogger } from '@logtape/logtape';
 import { S3Client } from 'bun';
+import { DiscordCommandsService } from '../clients/discord/services/discord-commands';
 import { env } from '../environment';
+import { RedisService } from '../services/redis';
 import { ToolService } from '../services/tools';
 import type { PluginContext, PluginFactory } from './types';
 
@@ -75,18 +77,14 @@ export async function loadPlugins(): Promise<void> {
       const context: PluginContext = {
         env: env(),
         logger: getLogger(['OpenBorys', 'plugins', key]),
+        toolService: ToolService,
+        commandService: DiscordCommandsService,
+        redis: RedisService.client(),
       };
 
-      const toolWithMeta = factory(context);
-      ToolService.registerTool(toolWithMeta);
+      await factory(context);
 
-      logger.info('Loaded plugin {id} ({name}) from {key}', {
-        id: toolWithMeta.id,
-        name: toolWithMeta.name,
-        key,
-      });
-
-      return toolWithMeta.id;
+      logger.info('Loaded plugin from {key}', { key });
     }),
   );
 
