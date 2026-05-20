@@ -7,6 +7,7 @@ import { env } from '../environment';
 import { FriendsService } from '../friends';
 import { EmbeddingsService } from '../services/embeddings';
 import { RedisService } from '../services/redis';
+import { ScopedToolService } from '../services/scoped-tools';
 import { ToolService } from '../services/tools';
 import { errorDetail } from '../utils/error';
 import type { PluginContext, PluginFactory } from './types';
@@ -81,6 +82,7 @@ export async function loadPlugins(): Promise<void> {
         env: env(),
         logger: getLogger(['OpenBorys', 'plugins', key]),
         toolService: ToolService,
+        scopedToolService: ScopedToolService,
         commandService: DiscordCommandsService,
         redis: RedisService.client(),
         friends: FriendsService,

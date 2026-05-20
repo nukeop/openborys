@@ -4,12 +4,14 @@ import type { DiscordCommandsService } from '../clients/discord/services/discord
 import type { Environment } from '../environment';
 import type { FriendsService } from '../friends';
 import type { EmbeddingsService } from '../services/embeddings';
+import type { ScopedToolService } from '../services/scoped-tools';
 import type { ToolService } from '../services/tools';
 
 export type PluginContext = {
   env: Environment;
   logger: Logger;
   toolService: typeof ToolService;
+  scopedToolService: typeof ScopedToolService;
   commandService: typeof DiscordCommandsService;
   redis: RedisClient;
   friends: typeof FriendsService;

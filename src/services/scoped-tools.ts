@@ -38,4 +38,39 @@ export class ScopedToolService {
   static clearScope = (scope: string) => {
     ScopedToolService.#tools.delete(scope);
   };
+
+  // Factories allow dynamically loaded plugins to register platform-specific,
+  // scoped tools.
+
+  // Factory context is `any` because each platform passes a different type
+  // (Discord passes Message, Matrix would pass its own event type, etc.)
+  // and this service is platform-agnostic. The alternative is a generic
+  // PlatformContextMap that couples this file to every platform's types.
+  static #factories: Map<
+    string,
+    Array<(context: any) => ToolWithMeta<any, any>>
+  > = new Map();
+
+  static registerScopedToolFactory = (
+    platform: string,
+    factory: (context: any) => ToolWithMeta<any, any>,
+  ) => {
+    const existing = ScopedToolService.#factories.get(platform);
+    if (existing) {
+      ScopedToolService.#factories.set(platform, [...existing, factory]);
+    } else {
+      ScopedToolService.#factories.set(platform, [factory]);
+    }
+  };
+
+  static instantiateFactories = (
+    platform: string,
+    context: any,
+    scope: string,
+  ) => {
+    const factories = ScopedToolService.#factories.get(platform) ?? [];
+    for (const factory of factories) {
+      ScopedToolService.registerTool(factory(context), scope);
+    }
+  };
 }

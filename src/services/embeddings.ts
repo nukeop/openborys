@@ -52,7 +52,7 @@ export class EmbeddingsService {
   static async search(query: string, limit = 5): Promise<string[]> {
     const vector = await EmbeddingsService.embedding(query);
 
-    logger.info(
+    logger.debug(
       'Searching Qdrant... (collection={collection}, bot={bot}, dims={dims}, limit={limit})',
       {
         collection: env().QDRANT_COLLECTION,
