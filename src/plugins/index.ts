@@ -4,6 +4,8 @@ import { getLogger } from '@logtape/logtape';
 import { S3Client } from 'bun';
 import { DiscordCommandsService } from '../clients/discord/services/discord-commands';
 import { env } from '../environment';
+import { FriendsService } from '../friends';
+import { EmbeddingsService } from '../services/embeddings';
 import { RedisService } from '../services/redis';
 import { ToolService } from '../services/tools';
 import type { PluginContext, PluginFactory } from './types';
@@ -80,6 +82,8 @@ export async function loadPlugins(): Promise<void> {
         toolService: ToolService,
         commandService: DiscordCommandsService,
         redis: RedisService.client(),
+        friends: FriendsService,
+        embeddings: EmbeddingsService,
       };
 
       await factory(context);
