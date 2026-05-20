@@ -24,6 +24,7 @@ const envSchema = z.object({
   PROMPTS_PREFIX: z.string().min(1).default('prompts/'),
   FRIENDS_PREFIX: z.string().min(1).default('friends/'),
   TOOL_STRINGS_PREFIX: z.string().min(1).default('tool-strings/'),
+  PLUGINS_PREFIX: z.string().min(1).default('plugins/'),
 
   TZ: z.string().min(1).default('UTC'),
 
