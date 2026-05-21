@@ -2,6 +2,7 @@ import { getLogger } from '@logtape/logtape';
 import { errorMessage } from '../utils/error';
 import { getIntrospection } from './api/introspect';
 import { getSkill, getSkills, loadSkill, unloadSkill } from './api/skills';
+import { getTools } from './api/tools';
 import index from './index.html';
 
 const logger = getLogger(['OpenBorys', 'web']);
@@ -15,6 +16,11 @@ export function startAdminServer() {
       '/api/introspect': {
         GET() {
           return Response.json(getIntrospection());
+        },
+      },
+      '/api/tools': {
+        GET() {
+          return Response.json(getTools());
         },
       },
       '/api/skills': {

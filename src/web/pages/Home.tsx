@@ -1,5 +1,6 @@
 import { IntrospectCard } from '../components/IntrospectCard';
 import { SkillsCard } from '../components/SkillsCard';
+import { ToolsCard } from '../components/ToolsCard';
 
 export function Home() {
   return (
@@ -7,6 +8,7 @@ export function Home() {
       <title>Dashboard</title>
       <h1 className="font-bold text-2xl text-zinc-100">Dashboard</h1>
       <IntrospectCard />
+      <ToolsCard />
       <SkillsCard />
     </div>
   );

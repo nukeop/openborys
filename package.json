@@ -36,6 +36,7 @@
     "@tanstack/react-query": "^5.100.6",
     "@tavily/core": "^0.7.2",
     "ai": "^6.0.168",
+    "clsx": "^2.1.1",
     "discord-api-types": "^0.38.47",
     "discord.js": "^14.26.3",
     "react": "^19.2.5",

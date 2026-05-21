@@ -33,6 +33,8 @@ export class ToolService {
 
   static getAlwaysAvailableTools = (): ToolWithMeta<unknown, unknown>[] =>
     ToolService.#tools.filter((entry) => entry.isAlwaysAvailable);
+
+  static getAll = (): ToolWithMeta<any, any>[] => ToolService.#tools;
 }
 
 export const toAITools = (toolsWithMeta: ToolWithMeta<any, any>[]) =>
