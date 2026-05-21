@@ -8,6 +8,7 @@ import { FriendsService } from '../friends';
 import { EmbeddingsService } from '../services/embeddings';
 import { RedisService } from '../services/redis';
 import { ScopedToolService } from '../services/scoped-tools';
+import { StringsService } from '../services/strings';
 import { ToolService } from '../services/tools';
 import { errorDetail } from '../utils/error';
 import type { PluginContext, PluginFactory } from './types';
@@ -86,6 +87,7 @@ export async function loadPlugins(): Promise<void> {
         commandService: DiscordCommandsService,
         redis: RedisService.client(),
         friends: FriendsService,
+        strings: StringsService,
         embeddings: EmbeddingsService,
       };
 

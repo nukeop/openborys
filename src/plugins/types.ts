@@ -5,6 +5,7 @@ import type { Environment } from '../environment';
 import type { FriendsService } from '../friends';
 import type { EmbeddingsService } from '../services/embeddings';
 import type { ScopedToolService } from '../services/scoped-tools';
+import type { StringsService } from '../services/strings';
 import type { ToolService } from '../services/tools';
 
 export type PluginContext = {
@@ -16,6 +17,7 @@ export type PluginContext = {
   redis: RedisClient;
   friends: typeof FriendsService;
   embeddings: typeof EmbeddingsService;
+  strings: typeof StringsService;
 };
 
 export type PluginFactory = (context: PluginContext) => void | Promise<void>;
