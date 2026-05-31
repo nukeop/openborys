@@ -1,6 +1,13 @@
 import { anthropic } from '@ai-sdk/anthropic';
 import { getLogger } from '@logtape/logtape';
-import { generateText, type LanguageModel, streamText } from 'ai';
+import {
+  generateText,
+  type LanguageModel,
+  type ModelMessage,
+  Output,
+  type Schema,
+  streamText,
+} from 'ai';
 import { ToolService, type ToolWithMeta, toAITools } from './tools';
 
 const logger = getLogger(['OpenBorys', 'Service', 'AI']);
@@ -14,6 +21,8 @@ const factories: Record<Provider, (model: string) => LanguageModel> = {
 let activeProvider: Provider = 'anthropic';
 let activeModelName = 'claude-haiku-4-5';
 let activeModel: LanguageModel = factories[activeProvider](activeModelName);
+
+const cheapModel: LanguageModel = anthropic('claude-haiku-4-5');
 
 export const setActive = (provider: Provider, model: string): void => {
   activeProvider = provider;
@@ -63,5 +72,18 @@ export const ai = {
       model: activeModel,
       allowSystemInMessages: true,
     } as Parameters<typeof streamText>[0]);
+  },
+  generateCheapObject: async <OBJECT>(
+    messages: ModelMessage[],
+    schema: Schema<OBJECT>,
+  ): Promise<OBJECT> => {
+    logger.info('Generating cheap object...');
+    const result = await generateText({
+      messages,
+      output: Output.object({ schema }),
+      model: cheapModel,
+      allowSystemInMessages: true,
+    });
+    return result.output;
   },
 };
