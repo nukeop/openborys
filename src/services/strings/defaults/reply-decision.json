@@ -1,0 +1,7 @@
+{
+  "instruction": "Decide whether to join this conversation now. Consider whether the conversation is interesting to you, whether you would be speaking too often, whether you would be interrupting other people, and whether your contribution would be valuable and natural. Return a JSON object with \"reason\" (a short comment) and \"shouldReply\" (a boolean).",
+  "previousDecision": "Your previous decision in this channel: {decision}. Reason: {reason}.",
+  "noPreviousDecision": "You have no previous decisions in this channel yet.",
+  "reply": "reply",
+  "skip": "skip"
+}
