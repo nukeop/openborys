@@ -1,5 +1,9 @@
 const DEFAULT_WINDOW_MS = 30_000;
 
+export type CooldownResult<T> =
+  | { status: 'completed'; value: T }
+  | { status: 'aborted' };
+
 export class ReplyDecisionCooldown {
   readonly #windowMs: number;
   readonly #pending = new Map<string, AbortController>();
@@ -11,7 +15,7 @@ export class ReplyDecisionCooldown {
   run = async <T>(
     channelId: string,
     task: (signal: AbortSignal) => Promise<T>,
-  ): Promise<T> => {
+  ): Promise<CooldownResult<T>> => {
     this.abort(channelId);
 
     const controller = new AbortController();
@@ -19,7 +23,13 @@ export class ReplyDecisionCooldown {
 
     try {
       await this.#wait(controller.signal);
-      return await task(controller.signal);
+      const value = await task(controller.signal);
+      return { status: 'completed', value };
+    } catch (error) {
+      if (controller.signal.aborted) {
+        return { status: 'aborted' };
+      }
+      throw error;
     } finally {
       if (this.#pending.get(channelId) === controller) {
         this.#pending.delete(channelId);

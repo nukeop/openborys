@@ -2,11 +2,15 @@ import { getLogger } from '@logtape/logtape';
 import type { Message } from 'discord.js';
 import { ai } from '../../../services/ai';
 import { StringsService } from '../../../services/strings';
+import { errorMessage } from '../../../utils/error';
 import { getDiscordContext } from '../context';
+import { ReplyDecisionCooldown } from './cooldown';
 import { replyDecisionSchema } from './schema';
 import { type ReplyDecision, ReplyDecisionStore } from './store';
 
 const logger = getLogger(['OpenBorys', 'Discord', 'ReplyDecision']);
+
+const cooldown = new ReplyDecisionCooldown();
 
 type ReplyDecisionStrings = {
   instruction: string;
@@ -30,7 +34,7 @@ const buildPreviousDecisionLine = (
     .replace('{reason}', previous.reason);
 };
 
-export const shouldAIReply = async (
+const decideWithAI = async (
   message: Message,
   signal: AbortSignal,
 ): Promise<boolean> => {
@@ -47,11 +51,8 @@ export const shouldAIReply = async (
   const result = await ai.generateCheapObject(
     [{ role: 'system', content: decisionPrompt }, ...context],
     replyDecisionSchema,
+    signal,
   );
-
-  if (signal.aborted) {
-    return false;
-  }
 
   logger.info('AI reply decision: {decision} - {reason}', {
     decision: result.shouldReply ? 'reply' : 'skip',
@@ -65,4 +66,22 @@ export const shouldAIReply = async (
   });
 
   return result.shouldReply;
+};
+
+export const cancelPendingDecision = (channelId: string): void => {
+  cooldown.abort(channelId);
+};
+
+export const decideReply = async (message: Message): Promise<boolean> => {
+  try {
+    const result = await cooldown.run(message.channelId, (signal) =>
+      decideWithAI(message, signal),
+    );
+    return result.status === 'completed' && result.value;
+  } catch (error) {
+    logger.error('Reply decision failed: {message}', {
+      message: errorMessage(error),
+    });
+    return false;
+  }
 };

@@ -76,6 +76,7 @@ export const ai = {
   generateCheapObject: async <OBJECT>(
     messages: ModelMessage[],
     schema: Schema<OBJECT>,
+    signal?: AbortSignal,
   ): Promise<OBJECT> => {
     logger.info('Generating cheap object...');
     const result = await generateText({
@@ -83,6 +84,7 @@ export const ai = {
       output: Output.object({ schema }),
       model: cheapModel,
       allowSystemInMessages: true,
+      abortSignal: signal,
     });
     return result.output;
   },

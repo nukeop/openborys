@@ -1,5 +1,6 @@
 import type { Attachment, Client, Message, TextBasedChannel } from 'discord.js';
 import { DISCORD_CONFIG } from '../../config/platforms/discord';
+import { cancelPendingDecision, decideReply } from './reply-decision';
 
 export const shouldReply = async (
   client: Client,
@@ -11,14 +12,16 @@ export const shouldReply = async (
   if (!client.user) {
     return false;
   }
-  if (!message.mentions.has(client.user)) {
-    return false;
-  }
   if (!message.channel.isSendable()) {
     return false;
   }
 
-  return true;
+  if (message.mentions.has(client.user)) {
+    cancelPendingDecision(message.channelId);
+    return true;
+  }
+
+  return decideReply(message);
 };
 
 export const findAttachments = async (
