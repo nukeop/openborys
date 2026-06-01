@@ -4,6 +4,7 @@ import { errorMessage } from '../utils/error';
 import { getIntrospection } from './api/introspect';
 import { getSkill, getSkills, loadSkill, unloadSkill } from './api/skills';
 import { getTools } from './api/tools';
+import { guard } from './auth';
 import index from './index.html';
 
 const logger = getLogger(['OpenBorys', 'web']);
@@ -17,27 +18,19 @@ export function startAdminServer() {
     port: ADMIN_PORT,
     routes: {
       '/api/introspect': {
-        GET() {
-          return Response.json(getIntrospection());
-        },
+        GET: guard(() => Response.json(getIntrospection())),
       },
       '/api/tools': {
-        GET() {
-          return Response.json(getTools());
-        },
+        GET: guard(() => Response.json(getTools())),
       },
       '/api/reply-decisions': {
-        GET() {
-          return Response.json(
-            ReplyDecisionStore.getRecent(RECENT_DECISION_LIMIT),
-          );
-        },
+        GET: guard(() =>
+          Response.json(ReplyDecisionStore.getRecent(RECENT_DECISION_LIMIT)),
+        ),
       },
       '/api/skills': {
-        GET() {
-          return Response.json(getSkills());
-        },
-        async POST(req) {
+        GET: guard(() => Response.json(getSkills())),
+        POST: guard(async (req) => {
           const { url } = (await req.json()) as { url: string };
           try {
             const skill = await loadSkill(url);
@@ -48,9 +41,9 @@ export function startAdminServer() {
               { status: 400 },
             );
           }
-        },
+        }),
       },
-      '/api/skills/:name': (req) => {
+      '/api/skills/:name': guard((req) => {
         const name = decodeURIComponent(req.params.name);
 
         if (req.method === 'DELETE') {
@@ -59,7 +52,7 @@ export function startAdminServer() {
         }
 
         return Response.json(getSkill(name));
-      },
+      }),
       '/*': index,
     },
   });

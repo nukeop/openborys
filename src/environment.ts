@@ -35,6 +35,8 @@ const envSchema = z.object({
 
   OPENAI_API_KEY: z.string().min(1),
   BOT_NAME: z.string().min(1),
+
+  DASHBOARD_PWD: z.string().min(1),
 });
 
 export type Environment = z.infer<typeof envSchema>;
