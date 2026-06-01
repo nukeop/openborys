@@ -1,27 +1,29 @@
 import type { Attachment, Client, Message, TextBasedChannel } from 'discord.js';
+import type { ReplyTrigger } from '../../agents/discord/types';
 import { DISCORD_CONFIG } from '../../config/platforms/discord';
 import { cancelPendingDecision, decideReply } from './reply-decision';
 
 export const shouldReply = async (
   client: Client,
   message: Message,
-): Promise<boolean> => {
+): Promise<ReplyTrigger | null> => {
   if (message.author.id === message.client.user.id) {
-    return false;
+    return null;
   }
   if (!client.user) {
-    return false;
+    return null;
   }
   if (!message.channel.isSendable()) {
-    return false;
+    return null;
   }
 
   if (message.mentions.has(client.user)) {
     cancelPendingDecision(message.channelId);
-    return true;
+    return 'mention';
   }
 
-  return decideReply(message);
+  const decided = await decideReply(message);
+  return decided ? 'decision' : null;
 };
 
 export const findAttachments = async (

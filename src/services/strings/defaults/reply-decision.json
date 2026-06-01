@@ -3,5 +3,6 @@
   "previousDecision": "Your previous decision in this channel: {decision}. Reason: {reason}.",
   "noPreviousDecision": "You have no previous decisions in this channel yet.",
   "reply": "reply",
-  "skip": "skip"
+  "skip": "skip",
+  "chosenToReply": "You chose to reply for this reason: {reason}."
 }

@@ -9,13 +9,13 @@ const logger = getLogger(['OpenBorys', 'Discord', 'Events', 'MessageCreate']);
 export const handleMessageCreate = (client: Client) => {
   client.on('messageCreate', async (message) => {
     try {
-      const willReply = await shouldReply(client, message);
-      if (!willReply) {
+      const trigger = await shouldReply(client, message);
+      if (!trigger) {
         return;
       }
       await message.channel.sendTyping();
 
-      await runAgent(message);
+      await runAgent(message, trigger);
     } catch (error) {
       logger.error('Unhandled error in messageCreate handler: {message}', {
         message: errorMessage(error),

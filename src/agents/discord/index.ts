@@ -9,7 +9,13 @@ import { messageReceived } from './handlers/message-received';
 import { sendingMessage } from './handlers/sending-message';
 import { thinking } from './handlers/thinking';
 import { toolCall } from './handlers/tool-call';
-import type { AgentState, RunContext, State, StateHandler } from './types';
+import type {
+  AgentState,
+  ReplyTrigger,
+  RunContext,
+  State,
+  StateHandler,
+} from './types';
 
 const logger = getLogger(['OpenBorys', 'Agent', 'Discord']);
 
@@ -32,13 +38,17 @@ const run = async (state: AgentState, ctx: RunContext): Promise<void> => {
   return run(next, ctx);
 };
 
-export const runAgent = async (source: Message): Promise<void> => {
+export const runAgent = async (
+  source: Message,
+  trigger: ReplyTrigger,
+): Promise<void> => {
   logger.debug('Starting Discord agent run');
 
   const ctx: RunContext = {
     messages: [],
     stepCount: 0,
     source,
+    trigger,
     lastResult: null,
     pendingToolCalls: [],
     currentToolCall: null,

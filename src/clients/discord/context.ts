@@ -12,8 +12,10 @@ import {
   type StoredToolCall,
   type StoredToolResult,
 } from '../../services/redis-tool-calls';
+import { StringsService } from '../../services/strings';
 import { SystemPromptService } from '../../services/system-prompt';
 import { formatTimestamp } from '../../utils/time';
+import { ReplyDecisionStore } from './reply-decision/store';
 
 // Maps a Discord message to an array of ModelMessage objects.
 // Assistant messages cannot contain images, so they are mapped as though they were sent by the user.
@@ -38,11 +40,12 @@ export const mapDiscordMessageToModelMessages = (
     type: 'text',
     text: `[${timestamp}]${authorPrefix}: ${message.cleanContent}`,
   };
-  const imageParts: (TextPart | ImagePart)[] = Array.from(images.values())
-    .flatMap((image): (TextPart | ImagePart)[] => [
-      { type: 'text', text: `Image: ${image.id}` },
-      { type: 'image', image: image.url },
-    ]);
+  const imageParts: (TextPart | ImagePart)[] = Array.from(
+    images.values(),
+  ).flatMap((image): (TextPart | ImagePart)[] => [
+    { type: 'text', text: `Image: ${image.id}` },
+    { type: 'image', image: image.url },
+  ]);
 
   if (isOwnMessage && !message.attachments.size) {
     modelMessages.push(createAssistantMessage({ content: [messagePart] }));
@@ -208,14 +211,37 @@ const formatMemories = (memories: string[]): string => {
   );
 };
 
-export const getDiscordContext = async (message: DiscordMessage) => {
+type ReplyDecisionStrings = { chosenToReply: string };
+
+const formatDecisionReason = (channelId: string): string => {
+  const latest = ReplyDecisionStore.getLatest(channelId);
+  if (!latest) {
+    return '';
+  }
+
+  const { chosenToReply } = StringsService.get(
+    'reply-decision',
+  ) as ReplyDecisionStrings;
+  return `\n\n${chosenToReply.replace('{reason}', latest.reason)}`;
+};
+
+export const getDiscordContext = async (
+  message: DiscordMessage,
+  includeDecisionReason = false,
+) => {
   const [context, memories] = await Promise.all([
     getLastMessages(message, DISCORD_CONFIG.contextSize.chat),
     getRelevantMemories(message),
   ]);
 
+  const decisionReason = includeDecisionReason
+    ? formatDecisionReason(message.channelId)
+    : '';
+
   const systemPrompt =
-    SystemPromptService.getSystemPrompt() + formatMemories(memories);
+    SystemPromptService.getSystemPrompt() +
+    formatMemories(memories) +
+    decisionReason;
 
   return { systemPrompt, context };
 };
