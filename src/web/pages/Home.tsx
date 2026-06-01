@@ -1,4 +1,5 @@
 import { IntrospectCard } from '../components/IntrospectCard';
+import { ReplyDecisionsCard } from '../components/ReplyDecisionsCard';
 import { SkillsCard } from '../components/SkillsCard';
 import { ToolsCard } from '../components/ToolsCard';
 
@@ -10,6 +11,7 @@ export function Home() {
       <IntrospectCard />
       <ToolsCard />
       <SkillsCard />
+      <ReplyDecisionsCard />
     </div>
   );
 }
