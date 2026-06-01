@@ -20,4 +20,10 @@ export class ReplyDecisionStore {
 
   static getHistory = (channelId: string): ReplyDecision[] =>
     ReplyDecisionStore.#history.get(channelId) ?? [];
+
+  static getRecent = (limit: number): ReplyDecision[] =>
+    [...ReplyDecisionStore.#history.values()]
+      .flat()
+      .sort((first, second) => second.timestamp - first.timestamp)
+      .slice(0, limit);
 }

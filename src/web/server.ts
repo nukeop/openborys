@@ -1,4 +1,5 @@
 import { getLogger } from '@logtape/logtape';
+import { ReplyDecisionStore } from '../clients/discord/reply-decision/store';
 import { errorMessage } from '../utils/error';
 import { getIntrospection } from './api/introspect';
 import { getSkill, getSkills, loadSkill, unloadSkill } from './api/skills';
@@ -8,6 +9,8 @@ import index from './index.html';
 const logger = getLogger(['OpenBorys', 'web']);
 
 const ADMIN_PORT = 3000;
+
+const RECENT_DECISION_LIMIT = 10;
 
 export function startAdminServer() {
   const server = Bun.serve({
@@ -21,6 +24,13 @@ export function startAdminServer() {
       '/api/tools': {
         GET() {
           return Response.json(getTools());
+        },
+      },
+      '/api/reply-decisions': {
+        GET() {
+          return Response.json(
+            ReplyDecisionStore.getRecent(RECENT_DECISION_LIMIT),
+          );
         },
       },
       '/api/skills': {
