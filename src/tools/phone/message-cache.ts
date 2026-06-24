@@ -19,6 +19,10 @@ export class PhoneMessageCache {
     return (this.#cache.get(contact) ?? []).slice(-count);
   }
 
+  getConversation(contact: string): PhoneMessage[] {
+    return this.#cache.get(contact) ?? [];
+  }
+
   getRecentCalls(limit: number): PhoneMessage[] {
     return [...this.#cache.values()]
       .flat()

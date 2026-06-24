@@ -37,6 +37,12 @@ export function startAdminServer() {
           ),
         ),
       },
+      '/api/phone-conversation/:contact': guard((req) => {
+        const contact = decodeURIComponent(req.params.contact);
+        return Response.json(
+          PhoneMessageCache.getInstance().getConversation(contact),
+        );
+      }),
       '/api/skills': {
         GET: guard(() => Response.json(getSkills())),
         POST: guard(async (req) => {

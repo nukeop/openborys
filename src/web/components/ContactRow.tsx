@@ -1,3 +1,4 @@
+import { Link } from 'wouter';
 import type { PhoneMessage } from '../../tools/phone/message-cache';
 
 const timestampFormat = new Intl.DateTimeFormat(undefined, {
@@ -15,7 +16,10 @@ function ContactInitial({ name }: { name: string }) {
 
 export function ContactRow({ message }: { message: PhoneMessage }) {
   return (
-    <div className="flex items-center gap-3 px-2 py-3">
+    <Link
+      to={`/phone/${encodeURIComponent(message.contact)}`}
+      className="flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-zinc-800/50"
+    >
       <ContactInitial name={message.contact} />
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
@@ -28,6 +32,6 @@ export function ContactRow({ message }: { message: PhoneMessage }) {
         </div>
         <p className="truncate text-sm text-zinc-500">{message.content}</p>
       </div>
-    </div>
+    </Link>
   );
 }
