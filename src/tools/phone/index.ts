@@ -92,13 +92,13 @@ export function createPhoneTool(): ToolWithMeta<PhoneInput, string> {
         },
       ];
 
-      cache.push(contact, { sender: 'bot', content: timestampedMessage });
+      cache.push({ sender: 'bot', contact, content: timestampedMessage, timestamp: Date.now() });
 
       try {
         const response = await ai.generateTextRaw({ messages });
         const result = response.text;
 
-        cache.push(contact, { sender: 'contact', content: result });
+        cache.push({ sender: 'contact', contact, content: result, timestamp: Date.now() });
 
         return result;
       } catch (error) {
