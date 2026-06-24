@@ -1,5 +1,6 @@
 import { getLogger } from '@logtape/logtape';
 import { ReplyDecisionStore } from '../clients/discord/reply-decision/store';
+import { PhoneMessageCache } from '../tools/phone/message-cache';
 import { errorMessage } from '../utils/error';
 import { getIntrospection } from './api/introspect';
 import { getSkill, getSkills, loadSkill, unloadSkill } from './api/skills';
@@ -12,6 +13,7 @@ const logger = getLogger(['OpenBorys', 'web']);
 const ADMIN_PORT = 3000;
 
 const RECENT_DECISION_LIMIT = 10;
+const RECENT_CALLS_LIMIT = 20;
 
 export function startAdminServer() {
   const server = Bun.serve({
@@ -26,6 +28,11 @@ export function startAdminServer() {
       '/api/reply-decisions': {
         GET: guard(() =>
           Response.json(ReplyDecisionStore.getRecent(RECENT_DECISION_LIMIT)),
+        ),
+      },
+      '/api/phone-calls': {
+        GET: guard(() =>
+          Response.json(PhoneMessageCache.getInstance().getRecentCalls(RECENT_CALLS_LIMIT)),
         ),
       },
       '/api/skills': {
