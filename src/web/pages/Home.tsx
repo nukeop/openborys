@@ -1,4 +1,5 @@
 import { IntrospectCard } from '../components/IntrospectCard';
+import { PhoneCallsCard } from '../components/PhoneCallsCard';
 import { ReplyDecisionsCard } from '../components/ReplyDecisionsCard';
 import { SkillsCard } from '../components/SkillsCard';
 import { ToolsCard } from '../components/ToolsCard';
@@ -11,7 +12,10 @@ export function Home() {
       <IntrospectCard />
       <ToolsCard />
       <SkillsCard />
-      <ReplyDecisionsCard />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <ReplyDecisionsCard />
+        <PhoneCallsCard />
+      </div>
     </div>
   );
 }

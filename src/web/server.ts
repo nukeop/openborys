@@ -32,7 +32,9 @@ export function startAdminServer() {
       },
       '/api/phone-calls': {
         GET: guard(() =>
-          Response.json(PhoneMessageCache.getInstance().getRecentCalls(RECENT_CALLS_LIMIT)),
+          Response.json(
+            PhoneMessageCache.getInstance().getRecentCalls(RECENT_CALLS_LIMIT),
+          ),
         ),
       },
       '/api/skills': {

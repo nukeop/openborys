@@ -20,8 +20,10 @@ export class PhoneMessageCache {
   }
 
   getRecentCalls(limit: number): PhoneMessage[] {
-    const all = [...this.#cache.values()].flat();
-    return all.sort((a, b) => b.timestamp - a.timestamp).slice(0, limit);
+    return [...this.#cache.values()]
+      .flat()
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, limit);
   }
 
   static getInstance(): PhoneMessageCache {
