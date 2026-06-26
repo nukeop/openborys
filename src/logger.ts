@@ -21,7 +21,11 @@ export const initLogger = async () => {
         lowestLevel: 'warning',
         sinks: ['console'],
       },
-      { category: 'OpenBorys', lowestLevel: 'debug', sinks: ['console'] },
+      {
+        category: 'OpenBorys',
+        lowestLevel: isProd() ? 'info' : 'debug',
+        sinks: ['console'],
+      },
     ],
   });
 };
