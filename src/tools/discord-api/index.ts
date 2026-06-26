@@ -1,7 +1,7 @@
 import { getLogger } from '@logtape/logtape';
 import { tool } from 'ai';
-import * as discord from 'discord.js';
 import type { Message } from 'discord.js';
+import * as discord from 'discord.js';
 import { StringsService } from '../../services/strings';
 import type { ToolWithMeta } from '../../services/tools';
 import { errorMessage } from '../../utils/error';
