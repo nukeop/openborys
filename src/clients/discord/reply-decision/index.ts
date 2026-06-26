@@ -79,10 +79,14 @@ export const decideReply = async (message: Message): Promise<boolean> => {
     );
     return result.status === 'completed' && result.value;
   } catch (error) {
-    const cause = error instanceof Error && 'cause' in error ? error.cause : undefined;
-    logger.error('Reply decision failed: {message} {cause}', {
+    let causeStr = 'no cause';
+    try {
+      const cause = error instanceof Error && 'cause' in error ? error.cause : undefined;
+      causeStr = cause ? String(cause) : 'no cause';
+    } catch {}
+    logger.error('Reply decision failed: {message} | cause: {cause}', {
       message: errorMessage(error),
-      cause: cause ? JSON.stringify(cause, null, 2) : 'no cause',
+      cause: causeStr,
     });
     return false;
   }
