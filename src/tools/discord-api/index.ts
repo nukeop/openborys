@@ -32,7 +32,7 @@ export const createDiscordApiTool: (
     name: strings.toolName,
     emoji: '⚙️',
     isAlwaysAvailable: true,
-    formatArgs: (args) => args.code.slice(0, 100),
+    formatArgs: (args) => args.code,
     tool: tool({
       description: strings.toolDescription,
       inputSchema: createDiscordApiInputSchema(strings.codeDescription),
