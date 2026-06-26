@@ -60,7 +60,7 @@ export const createDiscordApiTool: (
           discord,
         );
 
-        return JSON.stringify(result, null, 2);
+        return JSON.stringify(result ?? null, null, 2);
       } catch (error) {
         logger.error('Discord API tool error: {error}', {
           error: errorMessage(error),

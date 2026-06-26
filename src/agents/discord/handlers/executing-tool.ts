@@ -39,7 +39,7 @@ export const executingTool: StateHandler = async (ctx) => {
     type: 'tool-result',
     toolCallId: call.toolCallId,
     toolName: call.toolName,
-    output: { type: 'json', value: output as JSONValue },
+    output: { type: 'json', value: (output ?? null) as JSONValue },
   };
 
   const serverId = ctx.source.guildId ?? 'dm';
