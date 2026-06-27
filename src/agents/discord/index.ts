@@ -1,8 +1,6 @@
 import { getLogger } from '@logtape/logtape';
 import type { Message } from 'discord.js';
 import { registerDiscordTools } from '../../clients/discord/tools';
-
-import { createDiscordImageTool } from '../../tools/discord-image';
 import { error } from './handlers/error';
 import { executingTool } from './handlers/executing-tool';
 import { messageReceived } from './handlers/message-received';

@@ -28,7 +28,7 @@ export const createDiscordApiTool: (
   const strings = StringsService.get('discord-api') as DiscordApiStrings;
 
   return {
-    id: `${DISCORD_API_TOOL_ID}_${message.id}`,
+    id: DISCORD_API_TOOL_ID,
     name: strings.toolName,
     emoji: '⚙️',
     isAlwaysAvailable: true,

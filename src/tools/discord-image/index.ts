@@ -29,7 +29,7 @@ const pickOutputUrl = (output: string[] | string): string => {
 export const createDiscordImageTool: (
   message: Message,
 ) => ToolWithMeta<ImageInput, string> = (message) => ({
-  id: `${DISCORD_IMAGE_TOOL_ID}_${message.id}`,
+  id: DISCORD_IMAGE_TOOL_ID,
   name: 'Image',
   emoji: '🖍️',
   isAlwaysAvailable: true,
