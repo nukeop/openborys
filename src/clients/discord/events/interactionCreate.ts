@@ -11,7 +11,7 @@ const logger = getLogger([
 
 export const handleInteractionCreate = (client: Client) => {
   client.on(Events.InteractionCreate, async (interaction: Interaction) => {
-    if (!interaction.isChatInputCommand()) {
+    if (!interaction.isAutocomplete() && !interaction.isChatInputCommand()) {
       return;
     }
 
@@ -19,6 +19,13 @@ export const handleInteractionCreate = (client: Client) => {
 
     if (!command) {
       logger.warn(`No command matching ${interaction.commandName} was found.`);
+      return;
+    }
+
+    if (interaction.isAutocomplete()) {
+      if (command.autocomplete) {
+        await command.autocomplete(interaction);
+      }
       return;
     }
 

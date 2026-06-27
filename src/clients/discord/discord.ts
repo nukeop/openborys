@@ -1,6 +1,8 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import { env } from '../../environment';
+import { changeModelCommand } from './commands/change-model';
 import { loadEvents } from './events';
+import { DiscordCommandsService } from './services/discord-commands';
 
 class DiscordClient extends Client {
   constructor() {
@@ -19,7 +21,12 @@ class DiscordClient extends Client {
   }
 }
 
+const registerCommands = () => {
+  DiscordCommandsService.registerCommand(changeModelCommand);
+};
+
 export const run = async () => {
+  registerCommands();
   const client = new DiscordClient();
   await client.start(env().DISCORD_TOKEN);
 };
