@@ -41,7 +41,9 @@ export const createDiscordApiTool: (
       logger.info('Executing Discord API code: {code}', { code });
 
       try {
-        const jsCode = transpiler.transformSync(code);
+        const jsCode = transpiler.transformSync(
+          `async function __run() {\n${code}\n}`,
+        );
 
         const fn = new Function(
           'client',
@@ -49,7 +51,7 @@ export const createDiscordApiTool: (
           'message',
           'guild',
           'discord',
-          `return (async () => { ${jsCode} })()`,
+          `${jsCode}; return __run();`,
         );
 
         const result: unknown = await fn(
