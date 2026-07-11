@@ -9,6 +9,7 @@ const envSchema = z.object({
   DISCORD_CLIENT_ID: z.string().min(1),
 
   ANTHROPIC_API_KEY: z.string().min(1),
+  OPENROUTER_API_KEY: z.string().min(1),
 
   REDIS_URL: z.url(),
 
