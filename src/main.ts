@@ -7,11 +7,12 @@ import { run as runTui } from './clients/tui/tui';
 import { loadEnvironment } from './environment';
 import { FriendsService, loadFriends } from './friends';
 import { initLogger } from './logger';
+import { loadPlugins } from './plugins';
 import { loadPrompts } from './prompts';
+import { ActiveModelsService } from './services/active-models';
 import { EmbeddingsService } from './services/embeddings';
 import { StringsService } from './services/strings';
 import { SystemPromptService } from './services/system-prompt';
-import { loadPlugins } from './plugins';
 import { registerTools } from './tools';
 import { startAdminServer } from './web/server';
 
@@ -48,6 +49,7 @@ const run = async () => {
   const prompts = await loadPrompts();
   const friends = await loadFriends();
   await StringsService.loadStrings();
+  await ActiveModelsService.load();
   FriendsService.setFriends(friends);
   const friendsContext = FriendsService.getFriendsContext();
   SystemPromptService.setBasePrompt(
