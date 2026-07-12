@@ -38,7 +38,11 @@ export function IntrospectCard() {
       <div className="grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-3 lg:grid-cols-4">
         <Stat
           label="AI model"
-          value={`${data.ai.provider} / ${data.ai.model}`}
+          value={`${data.ai.main.provider} / ${data.ai.main.model}`}
+        />
+        <Stat
+          label="Cheap model"
+          value={`${data.ai.cheap.provider} / ${data.ai.cheap.model}`}
         />
         <Stat
           label="Platform"

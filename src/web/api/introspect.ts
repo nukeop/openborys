@@ -4,7 +4,6 @@ import { ActiveModelsService } from '../../services/active-models';
 
 export function getIntrospection() {
   const cpus = os.cpus();
-  const { provider, model } = ActiveModelsService.get('main');
 
   return {
     name: env().BOT_NAME,
@@ -24,8 +23,8 @@ export function getIntrospection() {
     },
     uptimeSeconds: os.uptime(),
     ai: {
-      provider,
-      model,
+      main: ActiveModelsService.get('main'),
+      cheap: ActiveModelsService.get('cheap'),
     },
   };
 }
