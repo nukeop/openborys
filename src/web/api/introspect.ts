@@ -1,10 +1,10 @@
 import os from 'node:os';
 import { env } from '../../environment';
-import { getActive } from '../../services/ai';
+import { ActiveModelsService } from '../../services/active-models';
 
 export function getIntrospection() {
   const cpus = os.cpus();
-  const { provider, model } = getActive();
+  const { provider, model } = ActiveModelsService.get('main');
 
   return {
     name: env().BOT_NAME,

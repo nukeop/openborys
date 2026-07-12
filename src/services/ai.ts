@@ -1,4 +1,3 @@
-import { anthropic } from '@ai-sdk/anthropic';
 import { getLogger } from '@logtape/logtape';
 import {
   generateText,
@@ -8,39 +7,21 @@ import {
   type Schema,
   streamText,
 } from 'ai';
+import { ActiveModelsService, type Tier } from './active-models';
+import { getProvider } from './providers';
 import { ToolService, type ToolWithMeta, toAITools } from './tools';
 
 const logger = getLogger(['OpenBorys', 'Service', 'AI']);
 
-export type Provider = 'anthropic';
-
-const factories: Record<Provider, (model: string) => LanguageModel> = {
-  anthropic,
+const resolveModel = (tier: Tier): LanguageModel => {
+  const { provider, model } = ActiveModelsService.get(tier);
+  return getProvider(provider).createModel(model);
 };
-
-let activeProvider: Provider = 'anthropic';
-let activeModelName = 'claude-haiku-4-5';
-let activeModel: LanguageModel = factories[activeProvider](activeModelName);
-
-const cheapModel: LanguageModel = anthropic('claude-haiku-4-5');
-
-export const setActive = (provider: Provider, model: string): void => {
-  activeProvider = provider;
-  activeModelName = model;
-  activeModel = factories[provider](model);
-};
-
-export const getActive = (): { provider: Provider; model: string } => ({
-  provider: activeProvider,
-  model: activeModelName,
-});
 
 type GenerateArgs = Omit<Parameters<typeof generateText>[0], 'model'>;
 type StreamArgs = Omit<Parameters<typeof streamText>[0], 'model'>;
 
 export const ai = {
-  setActive,
-  getActive,
   generateText: (args: GenerateArgs, extraTools?: ToolWithMeta<any, any>[]) => {
     logger.info('Generating text...');
     return generateText({
@@ -49,7 +30,7 @@ export const ai = {
         ...ToolService.getAlwaysAvailableTools(),
         ...(extraTools ?? []),
       ]),
-      model: activeModel,
+      model: resolveModel('main'),
       allowSystemInMessages: true,
     } as Parameters<typeof generateText>[0]);
   },
@@ -57,7 +38,7 @@ export const ai = {
     logger.info('Generating text (raw)...');
     return generateText({
       ...args,
-      model: activeModel,
+      model: resolveModel('main'),
       allowSystemInMessages: true,
     } as Parameters<typeof generateText>[0]);
   },
@@ -69,7 +50,7 @@ export const ai = {
         ...ToolService.getAlwaysAvailableTools(),
         ...(extraTools ?? []),
       ]),
-      model: activeModel,
+      model: resolveModel('main'),
       allowSystemInMessages: true,
     } as Parameters<typeof streamText>[0]);
   },
@@ -82,7 +63,7 @@ export const ai = {
     const result = await generateText({
       messages,
       output: Output.object({ schema }),
-      model: cheapModel,
+      model: resolveModel('cheap'),
       allowSystemInMessages: true,
       abortSignal: signal,
     });

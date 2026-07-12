@@ -1,8 +1,9 @@
 import { getLogger } from '@logtape/logtape';
 import { SlashCommandBuilder } from 'discord.js';
-import { ai } from '../../../services/ai';
-import { getAvailableModels } from '../../../services/anthropic-models';
+import { ActiveModelsService } from '../../../services/active-models';
+import { getProvider } from '../../../services/providers';
 import type { Command } from '../types';
+import { buildModelChoices } from './model-choices';
 
 const logger = getLogger(['OpenBorys', 'Discord', 'Commands', 'ChangeModel']);
 
@@ -19,25 +20,18 @@ export const changeModelCommand: Command = {
     ),
 
   autocomplete: async (interaction) => {
-    const query = interaction.options.getFocused().toLowerCase();
-    const models = await getAvailableModels();
+    const query = interaction.options.getFocused();
+    const { provider } = ActiveModelsService.get('main');
+    const models = await getProvider(provider).listModels();
 
-    const choices = models
-      .filter(
-        (m) =>
-          m.id.toLowerCase().includes(query) ||
-          m.display_name.toLowerCase().includes(query),
-      )
-      .map((m) => ({ name: m.display_name, value: m.id }));
-
-    await interaction.respond(choices);
+    await interaction.respond(buildModelChoices(models, query));
   },
 
   execute: async (interaction) => {
     const model = interaction.options.getString('model', true);
-    const previous = ai.getActive();
+    const previous = ActiveModelsService.get('main');
 
-    ai.setActive('anthropic', model);
+    await ActiveModelsService.setModel('main', model);
 
     logger.info('Model changed from {previous} to {model} by {user}', {
       previous: previous.model,

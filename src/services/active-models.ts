@@ -1,14 +1,14 @@
 import { getLogger } from '@logtape/logtape';
 import { z } from 'zod';
 import { env } from '../environment';
+import { getProvider } from './providers';
+import { PROVIDER_IDS, type Provider } from './providers/types';
 import { RedisService } from './redis';
 
 const logger = getLogger(['OpenBorys', 'Service', 'ActiveModels']);
 
-const providerSchema = z.enum(['anthropic', 'openrouter']);
-
 const modelSelectionSchema = z.object({
-  provider: providerSchema,
+  provider: z.enum(PROVIDER_IDS),
   model: z.string().min(1),
 });
 
@@ -17,22 +17,23 @@ const tierStateSchema = z.object({
   cheap: modelSelectionSchema,
 });
 
-export type Provider = z.infer<typeof providerSchema>;
 export type ModelSelection = z.infer<typeof modelSelectionSchema>;
 
 type TierState = z.infer<typeof tierStateSchema>;
 
 export type Tier = keyof TierState;
 
-const PROVIDER_DEFAULTS: Record<Provider, string> = {
-  anthropic: 'claude-haiku-4-5',
-  openrouter: 'anthropic/claude-haiku-4.5',
-};
+function defaultSelection(): ModelSelection {
+  return {
+    provider: 'anthropic',
+    model: getProvider('anthropic').defaultModel,
+  };
+}
 
 function defaultState(): TierState {
   return {
-    main: { provider: 'anthropic', model: PROVIDER_DEFAULTS.anthropic },
-    cheap: { provider: 'anthropic', model: PROVIDER_DEFAULTS.anthropic },
+    main: defaultSelection(),
+    cheap: defaultSelection(),
   };
 }
 
@@ -62,7 +63,7 @@ export class ActiveModelsService {
   static async setProvider(tier: Tier, provider: Provider): Promise<void> {
     const selection = ActiveModelsService.#state[tier];
     selection.provider = provider;
-    selection.model = PROVIDER_DEFAULTS[provider];
+    selection.model = getProvider(provider).defaultModel;
     await ActiveModelsService.#persist();
   }
 

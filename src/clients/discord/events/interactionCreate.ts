@@ -23,8 +23,16 @@ export const handleInteractionCreate = (client: Client) => {
     }
 
     if (interaction.isAutocomplete()) {
-      if (command.autocomplete) {
+      if (!command.autocomplete) {
+        return;
+      }
+
+      try {
         await command.autocomplete(interaction);
+      } catch (error) {
+        logger.error(`Error autocompleting ${interaction.commandName}`, {
+          error,
+        });
       }
       return;
     }
