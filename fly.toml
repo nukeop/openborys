@@ -1,9 +1,7 @@
-# fly.toml app configuration file generated for openborys on 2026-04-25T23:22:03+02:00
-#
+# Shared Fly.io config for all bot apps deployed from this repo.
+# There is intentionally no `app =` here: deploy explicitly with `fly deploy -a <app-name>`.
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
 
-app = 'openborys'
 primary_region = 'fra'
 
 [build]
