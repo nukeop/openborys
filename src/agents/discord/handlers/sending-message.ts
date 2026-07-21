@@ -1,5 +1,6 @@
 import { getLogger } from '@logtape/logtape';
 import { ScopedToolService } from '../../../services/scoped-tools';
+import { stripLeadingTimestamps } from '../../../utils/time';
 import type { StateHandler } from '../types';
 
 const logger = getLogger([
@@ -11,7 +12,7 @@ const logger = getLogger([
 ]);
 
 export const sendingMessage: StateHandler = async (ctx) => {
-  const text = ctx.lastResult?.text ?? '';
+  const text = stripLeadingTimestamps(ctx.lastResult?.text ?? '');
 
   if (text && ctx.source.channel.isSendable()) {
     logger.debug('Sending message...');
