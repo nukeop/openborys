@@ -1,54 +1,25 @@
 import { getLogger } from '@logtape/logtape';
-import type { ModelMessage } from 'ai';
 import { tool } from 'ai';
-import { env } from '../../environment';
-import { FriendsService } from '../../friends';
+import type { Message } from 'discord.js';
+import { findAttachments } from '../../clients/discord/utils';
 import { ai } from '../../services/ai';
-import { StringsService } from '../../services/strings';
 import type { ToolWithMeta } from '../../services/tools';
 import { errorMessage } from '../../utils/error';
+import { buildConversation, timestampMessage } from './conversation';
 import { PhoneMessageCache } from './message-cache';
+import { buildSystemPrompt } from './prompt';
 import { phoneInputSchema } from './schema';
+import { getPhoneStrings, interpolate } from './strings';
 import type { PhoneInput } from './types';
 
 const logger = getLogger(['OpenBorys', 'tools', 'phone']);
 
-export type PhoneStrings = {
-  toolName: string;
-  toolDescription: string;
-  systemPrompt: string;
-  callFailed: string;
-};
+const HISTORY_LENGTH = 5;
 
-function interpolate(template: string, vars: Record<string, string>): string {
-  return template.replace(
-    /\{(\w+)\}/g,
-    (match, key: string) => vars[key] ?? match,
-  );
-}
-
-function extractContactNames(contact: string): string[] {
-  return contact
-    .split(/\s+i\s+|,\s*/)
-    .map((name) => name.trim())
-    .filter((name) => name.length > 0);
-}
-
-export function createPhoneTool(): ToolWithMeta<PhoneInput, string> {
-  const strings = StringsService.get('phone') as PhoneStrings;
-
-  const buildSystemPrompt = (
-    contact: string,
-    descriptions: string[],
-  ): string => {
-    const descriptionsText =
-      descriptions.length > 0 ? descriptions.join('\n') : '';
-    return interpolate(strings.systemPrompt, {
-      botName: env().BOT_NAME,
-      contact,
-      descriptions: descriptionsText,
-    });
-  };
+export function createPhoneTool(
+  sourceMessage: Message,
+): ToolWithMeta<PhoneInput, string> {
+  const strings = getPhoneStrings();
 
   return {
     id: 'phone',
@@ -56,51 +27,43 @@ export function createPhoneTool(): ToolWithMeta<PhoneInput, string> {
     emoji: '📱',
     isAlwaysAvailable: true,
     formatArgs: (args) => `${args.contact}: ${args.message}`,
-    execute: async ({ contact, message }) => {
+    execute: async ({ contact, message, imageIds = [] }) => {
       logger.info('Calling: {contact}', { contact });
 
-      const timestamp = new Date().toLocaleString(undefined, {
-        timeZone: env().TZ,
-      });
-      const timestampedMessage = `[${timestamp}] ${message}`;
-
-      const names = extractContactNames(contact);
-      const descriptions = names
-        .map((name) => {
-          const friend = FriendsService.findByName(name);
-          return friend ? `${friend.name}: ${friend.description}` : null;
-        })
-        .filter((desc): desc is string => desc !== null);
-
       const cache = PhoneMessageCache.getInstance();
-      const history = cache.getLastMessages(contact, 5);
-
-      const messages: ModelMessage[] = [
-        {
-          role: 'system',
-          content: buildSystemPrompt(contact, descriptions),
-        },
-        ...history.map((msg) => ({
-          role: (msg.sender === 'bot' ? 'user' : 'assistant') as
-            | 'user'
-            | 'assistant',
-          content: msg.content,
-        })),
-        {
-          role: 'user',
-          content: timestampedMessage,
-        },
-      ];
-
-      cache.push({ sender: 'bot', contact, content: timestampedMessage, timestamp: Date.now() });
+      const outgoing = timestampMessage(message);
 
       try {
+        const imageUrls = await findAttachments(
+          sourceMessage.channel,
+          imageIds,
+        );
+
+        const messages = buildConversation({
+          systemPrompt: buildSystemPrompt(strings, contact),
+          history: cache.getLastMessages(contact, HISTORY_LENGTH),
+          text: outgoing,
+          imageUrls,
+        });
+
+        cache.push({
+          sender: 'bot',
+          contact,
+          content: outgoing,
+          timestamp: Date.now(),
+        });
+
         const response = await ai.generateTextRaw({ messages });
-        const result = response.text;
+        const reply = response.text;
 
-        cache.push({ sender: 'contact', contact, content: result, timestamp: Date.now() });
+        cache.push({
+          sender: 'contact',
+          contact,
+          content: reply,
+          timestamp: Date.now(),
+        });
 
-        return result;
+        return reply;
       } catch (error) {
         const msg = errorMessage(error);
         logger.error('Phone call failed: {error}', { error: msg });
