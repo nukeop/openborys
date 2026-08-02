@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import type { PhoneMessage } from '../../tools/phone/message-cache';
+import { BubbleImage } from './BubbleImage';
 
 const timestampFormat = new Intl.DateTimeFormat(undefined, {
   hour: 'numeric',
@@ -22,6 +23,9 @@ export function ChatBubble({ message }: { message: PhoneMessage }) {
           'items-start': !isBot,
         })}
       >
+        {message.imageUrls.map((url) => (
+          <BubbleImage key={url} url={url} />
+        ))}
         <div
           className={clsx('rounded-2xl px-4 py-2 text-sm leading-relaxed', {
             'rounded-br-sm bg-teal-700 text-teal-50': isBot,

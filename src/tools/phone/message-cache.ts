@@ -3,6 +3,7 @@ export type PhoneMessage = {
   content: string;
   contact: string;
   timestamp: number;
+  imageUrls: string[];
 };
 
 export class PhoneMessageCache {

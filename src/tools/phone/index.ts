@@ -51,6 +51,7 @@ export function createPhoneTool(
           contact,
           content: outgoing,
           timestamp: Date.now(),
+          imageUrls,
         });
 
         const response = await ai.generateTextRaw({ messages });
@@ -61,6 +62,7 @@ export function createPhoneTool(
           contact,
           content: reply,
           timestamp: Date.now(),
+          imageUrls: [],
         });
 
         return reply;
