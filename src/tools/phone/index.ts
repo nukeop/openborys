@@ -5,7 +5,7 @@ import { findAttachments } from '../../clients/discord/utils';
 import { ai } from '../../services/ai';
 import type { ToolWithMeta } from '../../services/tools';
 import { errorMessage } from '../../utils/error';
-import { buildConversation, timestampMessage } from './conversation';
+import { buildConversation } from './conversation';
 import { PhoneMessageCache } from './message-cache';
 import { buildSystemPrompt } from './prompt';
 import { phoneInputSchema } from './schema';
@@ -31,7 +31,7 @@ export function createPhoneTool(
       logger.info('Calling: {contact}', { contact });
 
       const cache = PhoneMessageCache.getInstance();
-      const outgoing = timestampMessage(message);
+      const timestamp = Date.now();
 
       try {
         const imageUrls = await findAttachments(
@@ -42,15 +42,16 @@ export function createPhoneTool(
         const messages = buildConversation({
           systemPrompt: buildSystemPrompt(strings, contact),
           history: cache.getLastMessages(contact, HISTORY_LENGTH),
-          text: outgoing,
+          text: message,
+          timestamp,
           imageUrls,
         });
 
         cache.push({
           sender: 'bot',
           contact,
-          content: outgoing,
-          timestamp: Date.now(),
+          content: message,
+          timestamp,
           imageUrls,
         });
 

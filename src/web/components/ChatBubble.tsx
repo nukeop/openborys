@@ -7,6 +7,11 @@ const timestampFormat = new Intl.DateTimeFormat(undefined, {
   minute: '2-digit',
 });
 
+const exactTimeFormat = new Intl.DateTimeFormat(undefined, {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+});
+
 export function ChatBubble({ message }: { message: PhoneMessage }) {
   const isBot = message.sender === 'bot';
 
@@ -27,6 +32,7 @@ export function ChatBubble({ message }: { message: PhoneMessage }) {
           <BubbleImage key={url} url={url} />
         ))}
         <div
+          title={exactTimeFormat.format(message.timestamp)}
           className={clsx('rounded-2xl px-4 py-2 text-sm leading-relaxed', {
             'rounded-br-sm bg-teal-700 text-teal-50': isBot,
             'rounded-bl-sm bg-zinc-700 text-zinc-100': !isBot,
