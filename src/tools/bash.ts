@@ -9,6 +9,7 @@ export const bashTool: ToolWithMeta<{ command: string }, string> = {
   name: 'Bash',
   emoji: '🖥️',
   isAlwaysAvailable: true,
+  provider: 'anthropic',
   formatArgs: (args) => args.command,
   execute: async ({ command }) => {
     logger.info('Running bash: {command}', { command });

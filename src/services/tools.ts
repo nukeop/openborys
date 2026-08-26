@@ -1,10 +1,12 @@
 import type { Tool } from 'ai';
+import type { Provider } from './providers/types';
 
 export type ToolWithMeta<INPUT, OUTPUT> = {
   id: string;
   name: string;
   emoji: string;
   isAlwaysAvailable: boolean;
+  provider?: Provider;
   formatArgs: (args: INPUT) => string;
   execute: (input: INPUT) => Promise<OUTPUT>;
   tool: Tool<INPUT, any>;
