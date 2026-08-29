@@ -3,6 +3,7 @@ import type { RedisClient } from 'bun';
 import type { DiscordCommandsService } from '../clients/discord/services/discord-commands';
 import type { Environment } from '../environment';
 import type { FriendsService } from '../friends';
+import type { ai } from '../services/ai';
 import type { EmbeddingsService } from '../services/embeddings';
 import type { ScopedToolService } from '../services/scoped-tools';
 import type { StringsService } from '../services/strings';
@@ -18,6 +19,7 @@ export type PluginContext = {
   friends: typeof FriendsService;
   embeddings: typeof EmbeddingsService;
   strings: typeof StringsService;
+  ai: typeof ai;
 };
 
 export type PluginFactory = (context: PluginContext) => void | Promise<void>;

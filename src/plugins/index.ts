@@ -5,6 +5,7 @@ import { S3Client } from 'bun';
 import { DiscordCommandsService } from '../clients/discord/services/discord-commands';
 import { env } from '../environment';
 import { FriendsService } from '../friends';
+import { ai } from '../services/ai';
 import { EmbeddingsService } from '../services/embeddings';
 import { RedisService } from '../services/redis';
 import { ScopedToolService } from '../services/scoped-tools';
@@ -89,6 +90,7 @@ export async function loadPlugins(): Promise<void> {
         friends: FriendsService,
         strings: StringsService,
         embeddings: EmbeddingsService,
+        ai,
       };
 
       await factory(context);
