@@ -2,12 +2,7 @@ import { getLogger } from '@logtape/logtape';
 import { z } from 'zod';
 import { env } from '../environment';
 import { getProvider } from './providers';
-import {
-  INPUT_MODALITIES,
-  type InputModality,
-  PROVIDER_IDS,
-  type Provider,
-} from './providers/types';
+import { type ModelRef, PROVIDER_IDS, type Provider } from './providers/types';
 import { RedisService } from './redis';
 
 const logger = getLogger(['OpenBorys', 'Service', 'ActiveModels']);
@@ -15,7 +10,7 @@ const logger = getLogger(['OpenBorys', 'Service', 'ActiveModels']);
 const modelSelectionSchema = z.object({
   provider: z.enum(PROVIDER_IDS),
   model: z.string().min(1),
-  inputModalities: z.array(z.enum(INPUT_MODALITIES)).default(['text', 'image']),
+  inputModalities: z.array(z.string()).default(['text', 'image']),
 });
 
 const tierStateSchema = z.object({
@@ -64,10 +59,7 @@ export class ActiveModelsService {
     return { provider, model, inputModalities };
   }
 
-  static async setModel(
-    tier: Tier,
-    model: { id: string; inputModalities: InputModality[] },
-  ): Promise<void> {
+  static async setModel(tier: Tier, model: ModelRef): Promise<void> {
     const selection = ActiveModelsService.#state[tier];
     selection.model = model.id;
     selection.inputModalities = model.inputModalities;

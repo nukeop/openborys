@@ -28,11 +28,15 @@ const fetchModels = async (): Promise<ProviderModel[]> => {
     id: model.id,
     name: model.display_name,
     pricing: null,
+    inputModalities: ['text', 'image'],
   }));
 };
 
 export const anthropicProvider: AiProvider = {
-  defaultModel: 'claude-haiku-4-5',
+  defaultModel: {
+    id: 'claude-haiku-4-5',
+    inputModalities: ['text', 'image'],
+  },
   createModel: (model) => anthropic(model),
   listModels: fetchModels,
 };

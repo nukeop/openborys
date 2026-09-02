@@ -1,11 +1,6 @@
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { env } from '../../environment';
-import {
-  type AiProvider,
-  INPUT_MODALITIES,
-  type InputModality,
-  type ProviderModel,
-} from './types';
+import type { AiProvider, ProviderModel } from './types';
 
 const MODELS_URL =
   'https://openrouter.ai/api/v1/models?sort=top-weekly&supported_parameters=tools';
@@ -28,14 +23,6 @@ type OpenRouterModelsResponse = {
   data: OpenRouterApiModel[];
 };
 
-const KNOWN_INPUT_MODALITIES: ReadonlySet<string> = new Set(INPUT_MODALITIES);
-
-const isKnownInputModality = (modality: string): modality is InputModality =>
-  KNOWN_INPUT_MODALITIES.has(modality);
-
-const toKnownInputModalities = (modalities: string[]): InputModality[] =>
-  modalities.filter(isKnownInputModality);
-
 export const toProviderModel = (raw: OpenRouterApiModel): ProviderModel => ({
   id: raw.id,
   name: raw.name,
@@ -46,7 +33,7 @@ export const toProviderModel = (raw: OpenRouterApiModel): ProviderModel => ({
       Number.parseFloat(raw.pricing.completion) *
       USD_PER_TOKEN_TO_USD_PER_MILLION,
   },
-  inputModalities: toKnownInputModalities(raw.architecture.input_modalities),
+  inputModalities: raw.architecture.input_modalities,
 });
 
 const fetchModels = async (): Promise<ProviderModel[]> => {

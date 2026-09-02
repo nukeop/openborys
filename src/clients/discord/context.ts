@@ -20,11 +20,10 @@ import { ReplyDecisionStore } from './reply-decision/store';
 // Maps a Discord message to an array of ModelMessage objects.
 // Assistant messages cannot contain images, so they are mapped as though they were sent by the user.
 // This can confuse the AI but is unavoidable (the only way to allow the bot to see its own images).
-// One Discord message can map to multiple ModelMessages.
+// One Discord message can map to multiple ModelMessages, or to none at all.
 export const mapDiscordMessageToModelMessages = (
   message: DiscordMessage,
 ): ModelMessage[] => {
-  const modelMessages: ModelMessage[] = [];
   const isOwnMessage = message.author.id === message.client.user.id;
   const timestamp = formatTimestamp(message.createdTimestamp);
   const serverNickname = (
@@ -47,21 +46,21 @@ export const mapDiscordMessageToModelMessages = (
     { type: 'image', image: image.url },
   ]);
 
-  if (isOwnMessage && !message.attachments.size) {
-    modelMessages.push(createAssistantMessage({ content: [messagePart] }));
-  }
-
-  if (isOwnMessage && message.attachments.size) {
-    modelMessages.push(createUserMessage({ content: imageParts }));
-  }
-
   if (!isOwnMessage) {
-    modelMessages.push(
-      createUserMessage({ content: [messagePart, ...imageParts] }),
-    );
+    return [createUserMessage({ content: [messagePart, ...imageParts] })];
   }
 
-  return modelMessages;
+  if (imageParts.length > 0) {
+    return [createUserMessage({ content: imageParts })];
+  }
+
+  // Attachments the model cannot read (video, audio, plain files) yield no parts,
+  // so a caption-less one would become an empty message and providers reject those.
+  if (!message.cleanContent.trim()) {
+    return [];
+  }
+
+  return [createAssistantMessage({ content: [messagePart] })];
 };
 
 type TimestampedMessages = {

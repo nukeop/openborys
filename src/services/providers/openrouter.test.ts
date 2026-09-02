@@ -7,12 +7,14 @@ describe('toProviderModel', () => {
       id: 'openai/gpt-5.6-luna-pro',
       name: 'OpenAI: GPT-5.6 Luna Pro',
       pricing: { prompt: '0.000001', completion: '0.000006' },
+      architecture: { input_modalities: ['text', 'image'] },
     });
 
     expect(model).toEqual({
       id: 'openai/gpt-5.6-luna-pro',
       name: 'OpenAI: GPT-5.6 Luna Pro',
       pricing: { promptUsdPerM: 1, completionUsdPerM: 6 },
+      inputModalities: ['text', 'image'],
     });
   });
 
@@ -21,6 +23,7 @@ describe('toProviderModel', () => {
       id: 'tencent/hy3:free',
       name: 'Tencent: HY3 (free)',
       pricing: { prompt: '0', completion: '0' },
+      architecture: { input_modalities: ['text'] },
     });
 
     expect(model.pricing).toEqual({
