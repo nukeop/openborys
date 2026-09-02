@@ -7,22 +7,38 @@ const pricedModels: ProviderModel[] = [
     id: 'deepseek/deepseek-v4-flash',
     name: 'DeepSeek: DeepSeek V4 Flash',
     pricing: { promptUsdPerM: 0.077, completionUsdPerM: 0.154 },
+    inputModalities: ['text', 'image'],
   },
   {
     id: 'verbose-lab/model-with-an-extremely-long-name',
     name: `Verbose Lab: ${'Very '.repeat(20)}Long Model Name`,
     pricing: { promptUsdPerM: 12, completionUsdPerM: 48 },
+    inputModalities: ['text', 'image'],
   },
-  ...Array.from({ length: 30 }, (_, index) => ({
-    id: `filler/model-${index}`,
-    name: `Filler: Model ${index}`,
-    pricing: { promptUsdPerM: 1, completionUsdPerM: 2 },
-  })),
+  ...Array.from(
+    { length: 30 },
+    (_, index): ProviderModel => ({
+      id: `filler/model-${index}`,
+      name: `Filler: Model ${index}`,
+      pricing: { promptUsdPerM: 1, completionUsdPerM: 2 },
+      inputModalities: ['text', 'image'],
+    }),
+  ),
 ];
 
 const unpricedModels: ProviderModel[] = [
-  { id: 'claude-haiku-4-5', name: 'Claude Haiku 4.5', pricing: null },
-  { id: 'claude-opus-4-1', name: 'Claude Opus 4.1', pricing: null },
+  {
+    id: 'claude-haiku-4-5',
+    name: 'Claude Haiku 4.5',
+    pricing: null,
+    inputModalities: ['text', 'image'],
+  },
+  {
+    id: 'claude-opus-4-1',
+    name: 'Claude Opus 4.1',
+    pricing: null,
+    inputModalities: ['text', 'image'],
+  },
 ];
 
 describe('buildModelChoices', () => {

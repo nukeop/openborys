@@ -28,19 +28,21 @@ export const changeModelCommand: Command = {
   },
 
   execute: async (interaction) => {
-    const model = interaction.options.getString('model', true);
+    const id = interaction.options.getString('model', true);
     const previous = ActiveModelsService.get('main');
+    const models = await getProvider(previous.provider).listModels();
+    const model = models.find((candidate) => candidate.id === id)!;
 
     await ActiveModelsService.setModel('main', model);
 
     logger.info('Model changed from {previous} to {model} by {user}', {
       previous: previous.model,
-      model,
+      model: model.id,
       user: interaction.user.tag,
     });
 
     await interaction.reply({
-      content: `Model changed: **${previous.model}** → **${model}**`,
+      content: `Model changed: **${previous.model}** → **${model.id}**`,
       ephemeral: true,
     });
   },

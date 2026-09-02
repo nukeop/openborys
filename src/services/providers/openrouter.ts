@@ -1,6 +1,11 @@
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { env } from '../../environment';
-import type { AiProvider, ProviderModel } from './types';
+import {
+  type AiProvider,
+  INPUT_MODALITIES,
+  type InputModality,
+  type ProviderModel,
+} from './types';
 
 const MODELS_URL =
   'https://openrouter.ai/api/v1/models?sort=top-weekly&supported_parameters=tools';
@@ -14,11 +19,22 @@ type OpenRouterApiModel = {
     prompt: string;
     completion: string;
   };
+  architecture: {
+    input_modalities: string[];
+  };
 };
 
 type OpenRouterModelsResponse = {
   data: OpenRouterApiModel[];
 };
+
+const KNOWN_INPUT_MODALITIES: ReadonlySet<string> = new Set(INPUT_MODALITIES);
+
+const isKnownInputModality = (modality: string): modality is InputModality =>
+  KNOWN_INPUT_MODALITIES.has(modality);
+
+const toKnownInputModalities = (modalities: string[]): InputModality[] =>
+  modalities.filter(isKnownInputModality);
 
 export const toProviderModel = (raw: OpenRouterApiModel): ProviderModel => ({
   id: raw.id,
@@ -30,6 +46,7 @@ export const toProviderModel = (raw: OpenRouterApiModel): ProviderModel => ({
       Number.parseFloat(raw.pricing.completion) *
       USD_PER_TOKEN_TO_USD_PER_MILLION,
   },
+  inputModalities: toKnownInputModalities(raw.architecture.input_modalities),
 });
 
 const fetchModels = async (): Promise<ProviderModel[]> => {
@@ -44,7 +61,10 @@ const fetchModels = async (): Promise<ProviderModel[]> => {
 };
 
 export const openRouterProvider: AiProvider = {
-  defaultModel: 'anthropic/claude-haiku-4.5',
+  defaultModel: {
+    id: 'anthropic/claude-haiku-4.5',
+    inputModalities: ['text', 'image'],
+  },
   createModel: (model) =>
     createOpenRouter({ apiKey: env().OPENROUTER_API_KEY }).chat(model),
   listModels: fetchModels,

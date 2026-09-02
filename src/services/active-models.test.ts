@@ -32,17 +32,22 @@ describe('ActiveModelsService', () => {
       expect(main).toEqual({
         provider: 'anthropic',
         model: 'claude-haiku-4-5',
+        inputModalities: ['text', 'image'],
       });
       expect(cheap).toEqual({
         provider: 'anthropic',
         model: 'claude-haiku-4-5',
+        inputModalities: ['text', 'image'],
       });
     });
   });
 
   describe('setModel', () => {
     it('changes only the specified tier, leaving the other untouched', async () => {
-      await ActiveModelsService.setModel('main', 'claude-sonnet-4-20250514');
+      await ActiveModelsService.setModel('main', {
+        id: 'claude-sonnet-4-20250514',
+        inputModalities: ['text', 'image'],
+      });
 
       const main = ActiveModelsService.get('main');
       const cheap = ActiveModelsService.get('cheap');
@@ -50,15 +55,20 @@ describe('ActiveModelsService', () => {
       expect(main).toEqual({
         provider: 'anthropic',
         model: 'claude-sonnet-4-20250514',
+        inputModalities: ['text', 'image'],
       });
       expect(cheap).toEqual({
         provider: 'anthropic',
         model: 'claude-haiku-4-5',
+        inputModalities: ['text', 'image'],
       });
     });
 
     it('persists the state to Redis', async () => {
-      await ActiveModelsService.setModel('main', 'claude-sonnet-4-20250514');
+      await ActiveModelsService.setModel('main', {
+        id: 'claude-sonnet-4-20250514',
+        inputModalities: ['text', 'image'],
+      });
 
       expect(mockClient.set).toHaveBeenCalledWith(
         REDIS_KEY,
@@ -80,6 +90,7 @@ describe('ActiveModelsService', () => {
       expect(cheap).toEqual({
         provider: 'openrouter',
         model: 'anthropic/claude-haiku-4.5',
+        inputModalities: ['text', 'image'],
       });
     });
 
@@ -91,6 +102,7 @@ describe('ActiveModelsService', () => {
       expect(main).toEqual({
         provider: 'anthropic',
         model: 'claude-haiku-4-5',
+        inputModalities: ['text', 'image'],
       });
     });
 
@@ -106,13 +118,17 @@ describe('ActiveModelsService', () => {
       expect(persisted.cheap).toEqual({
         provider: 'openrouter',
         model: 'anthropic/claude-haiku-4.5',
+        inputModalities: ['text', 'image'],
       });
     });
   });
 
   describe('load', () => {
     it('restores state from Redis after setModel round-trip', async () => {
-      await ActiveModelsService.setModel('main', 'claude-sonnet-4-20250514');
+      await ActiveModelsService.setModel('main', {
+        id: 'claude-sonnet-4-20250514',
+        inputModalities: ['text', 'image'],
+      });
 
       const serialized = mockClient.set.mock.calls[0]![1];
       mockClient.get.mockResolvedValue(serialized);
@@ -124,6 +140,7 @@ describe('ActiveModelsService', () => {
       expect(main).toEqual({
         provider: 'anthropic',
         model: 'claude-sonnet-4-20250514',
+        inputModalities: ['text', 'image'],
       });
     });
 
@@ -140,6 +157,7 @@ describe('ActiveModelsService', () => {
       expect(cheap).toEqual({
         provider: 'openrouter',
         model: 'anthropic/claude-haiku-4.5',
+        inputModalities: ['text', 'image'],
       });
     });
 
@@ -153,10 +171,12 @@ describe('ActiveModelsService', () => {
       expect(ActiveModelsService.get('main')).toEqual({
         provider: 'anthropic',
         model: 'claude-haiku-4-5',
+        inputModalities: ['text', 'image'],
       });
       expect(ActiveModelsService.get('cheap')).toEqual({
         provider: 'anthropic',
         model: 'claude-haiku-4-5',
+        inputModalities: ['text', 'image'],
       });
     });
 
@@ -168,11 +188,29 @@ describe('ActiveModelsService', () => {
       expect(ActiveModelsService.get('main')).toEqual({
         provider: 'anthropic',
         model: 'claude-haiku-4-5',
+        inputModalities: ['text', 'image'],
       });
       expect(ActiveModelsService.get('cheap')).toEqual({
         provider: 'anthropic',
         model: 'claude-haiku-4-5',
+        inputModalities: ['text', 'image'],
       });
+    });
+
+    it('defaults a persisted blob with no inputModalities key to text and image', async () => {
+      mockClient.get.mockResolvedValue(
+        JSON.stringify({
+          main: { provider: 'anthropic', model: 'claude-sonnet-4-20250514' },
+          cheap: { provider: 'anthropic', model: 'claude-haiku-4-5' },
+        }),
+      );
+
+      await ActiveModelsService.load();
+
+      expect(ActiveModelsService.get('main').inputModalities).toEqual([
+        'text',
+        'image',
+      ]);
     });
   });
 });

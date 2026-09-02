@@ -2,7 +2,12 @@ import { getLogger } from '@logtape/logtape';
 import { z } from 'zod';
 import { env } from '../environment';
 import { getProvider } from './providers';
-import { PROVIDER_IDS, type Provider } from './providers/types';
+import {
+  INPUT_MODALITIES,
+  type InputModality,
+  PROVIDER_IDS,
+  type Provider,
+} from './providers/types';
 import { RedisService } from './redis';
 
 const logger = getLogger(['OpenBorys', 'Service', 'ActiveModels']);
@@ -10,6 +15,7 @@ const logger = getLogger(['OpenBorys', 'Service', 'ActiveModels']);
 const modelSelectionSchema = z.object({
   provider: z.enum(PROVIDER_IDS),
   model: z.string().min(1),
+  inputModalities: z.array(z.enum(INPUT_MODALITIES)).default(['text', 'image']),
 });
 
 const tierStateSchema = z.object({
@@ -24,9 +30,11 @@ type TierState = z.infer<typeof tierStateSchema>;
 export type Tier = keyof TierState;
 
 function defaultSelection(): ModelSelection {
+  const { id, inputModalities } = getProvider('anthropic').defaultModel;
   return {
     provider: 'anthropic',
-    model: getProvider('anthropic').defaultModel,
+    model: id,
+    inputModalities,
   };
 }
 
@@ -51,19 +59,27 @@ export class ActiveModelsService {
   }
 
   static get(tier: Tier): ModelSelection {
-    const { provider, model } = ActiveModelsService.#state[tier];
-    return { provider, model };
+    const { provider, model, inputModalities } =
+      ActiveModelsService.#state[tier];
+    return { provider, model, inputModalities };
   }
 
-  static async setModel(tier: Tier, model: string): Promise<void> {
-    ActiveModelsService.#state[tier].model = model;
+  static async setModel(
+    tier: Tier,
+    model: { id: string; inputModalities: InputModality[] },
+  ): Promise<void> {
+    const selection = ActiveModelsService.#state[tier];
+    selection.model = model.id;
+    selection.inputModalities = model.inputModalities;
     await ActiveModelsService.#persist();
   }
 
   static async setProvider(tier: Tier, provider: Provider): Promise<void> {
     const selection = ActiveModelsService.#state[tier];
+    const { id, inputModalities } = getProvider(provider).defaultModel;
     selection.provider = provider;
-    selection.model = getProvider(provider).defaultModel;
+    selection.model = id;
+    selection.inputModalities = inputModalities;
     await ActiveModelsService.#persist();
   }
 
