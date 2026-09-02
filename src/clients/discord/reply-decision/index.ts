@@ -39,7 +39,7 @@ const decideWithAI = async (
   signal: AbortSignal,
 ): Promise<boolean> => {
   const strings = StringsService.get('reply-decision') as ReplyDecisionStrings;
-  const { systemPrompt, context } = await getDiscordContext(message);
+  const { systemPrompt, context } = await getDiscordContext(message, 'cheap');
   const previous = ReplyDecisionStore.getLatest(message.channelId);
 
   const decisionPrompt = [

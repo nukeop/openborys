@@ -18,6 +18,7 @@ export const messageReceived: StateHandler = async (ctx) => {
   });
   const { systemPrompt, context } = await getDiscordContext(
     ctx.source,
+    'main',
     ctx.trigger === 'decision',
   );
   ctx.messages = [{ role: 'system', content: systemPrompt }, ...context];

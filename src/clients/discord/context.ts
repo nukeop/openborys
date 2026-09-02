@@ -1,6 +1,7 @@
-import type { ImagePart, ModelMessage, TextPart } from 'ai';
+import type { ModelMessage, TextPart } from 'ai';
 import type { Message as DiscordMessage } from 'discord.js';
 import { DISCORD_CONFIG } from '../../config/platforms/discord';
+import { ActiveModelsService, type Tier } from '../../services/active-models';
 import {
   createAssistantMessage,
   createToolResult,
@@ -15,15 +16,17 @@ import {
 import { StringsService } from '../../services/strings';
 import { SystemPromptService } from '../../services/system-prompt';
 import { formatTimestamp } from '../../utils/time';
+import { getUsableAttachmentParts } from './attachments';
 import { ReplyDecisionStore } from './reply-decision/store';
 
 // Maps a Discord message to an array of ModelMessage objects.
-// Assistant messages cannot contain images, so they are mapped as though they were sent by the user.
-// This can confuse the AI but is unavoidable (the only way to allow the bot to see its own images).
+// Assistant messages cannot contain attachments, so they are mapped as though they were sent by the user.
+// This can confuse the AI but is unavoidable (the only way to allow the bot to see its own attachments).
 // One Discord message can map to multiple ModelMessages, or to none at all.
-export const mapDiscordMessageToModelMessages = (
+export const mapDiscordMessageToModelMessages = async (
   message: DiscordMessage,
-): ModelMessage[] => {
+  inputModalities: string[],
+): Promise<ModelMessage[]> => {
   const isOwnMessage = message.author.id === message.client.user.id;
   const timestamp = formatTimestamp(message.createdTimestamp);
   const serverNickname = (
@@ -31,30 +34,25 @@ export const mapDiscordMessageToModelMessages = (
   ).replace(/[^a-zA-Z0-9_-]/g, '');
   const authorPrefix = !isOwnMessage ? `[${serverNickname}]` : '';
 
-  const images = message.attachments.filter((attachment) =>
-    attachment.contentType?.startsWith('image/'),
-  );
-
   const messagePart: TextPart = {
     type: 'text',
     text: `[${timestamp}]${authorPrefix}: ${message.cleanContent}`,
   };
-  const imageParts: (TextPart | ImagePart)[] = Array.from(
-    images.values(),
-  ).flatMap((image): (TextPart | ImagePart)[] => [
-    { type: 'text', text: `Image: ${image.id}` },
-    { type: 'image', image: image.url },
-  ]);
+
+  const attachmentParts = await getUsableAttachmentParts(
+    message,
+    inputModalities,
+  );
 
   if (!isOwnMessage) {
-    return [createUserMessage({ content: [messagePart, ...imageParts] })];
+    return [createUserMessage({ content: [messagePart, ...attachmentParts] })];
   }
 
-  if (imageParts.length > 0) {
-    return [createUserMessage({ content: imageParts })];
+  if (attachmentParts.length > 0) {
+    return [createUserMessage({ content: attachmentParts })];
   }
 
-  // Attachments the model cannot read (video, audio, plain files) yield no parts,
+  // Attachments the model cannot read yield no parts,
   // so a caption-less one would become an empty message and providers reject those.
   if (!message.cleanContent.trim()) {
     return [];
@@ -68,11 +66,12 @@ type TimestampedMessages = {
   messages: ModelMessage[];
 };
 
-const discordToTimestamped = (
+const discordToTimestamped = async (
   message: DiscordMessage,
-): TimestampedMessages => ({
+  inputModalities: string[],
+): Promise<TimestampedMessages> => ({
   timestamp: message.createdTimestamp,
-  messages: mapDiscordMessageToModelMessages(message),
+  messages: await mapDiscordMessageToModelMessages(message, inputModalities),
 });
 
 const toolPairToTimestamped = (
@@ -89,6 +88,7 @@ const toolPairToTimestamped = (
 export const getLastMessages = async (
   message: DiscordMessage,
   contextWindowSize: number,
+  inputModalities: string[],
 ): Promise<ModelMessage[]> => {
   const rawMessages = await message.channel.messages.fetch({
     limit: contextWindowSize,
@@ -112,7 +112,9 @@ export const getLastMessages = async (
     last.createdTimestamp,
   );
 
-  const discordEntries = sorted.map(discordToTimestamped).values().toArray();
+  const discordEntries = await Promise.all(
+    sorted.map((entry) => discordToTimestamped(entry, inputModalities)),
+  );
   const toolEntries = toolPairs.map(({ call, result }) =>
     toolPairToTimestamped(call, result),
   );
@@ -226,10 +228,12 @@ const formatDecisionReason = (channelId: string): string => {
 
 export const getDiscordContext = async (
   message: DiscordMessage,
+  tier: Tier,
   includeDecisionReason = false,
 ) => {
+  const { inputModalities } = ActiveModelsService.get(tier);
   const [context, memories] = await Promise.all([
-    getLastMessages(message, DISCORD_CONFIG.contextSize.chat),
+    getLastMessages(message, DISCORD_CONFIG.contextSize.chat, inputModalities),
     getRelevantMemories(message),
   ]);
 
