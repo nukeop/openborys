@@ -1,8 +1,16 @@
-export type GptImage2Input = {
+export type GptImage25Input = {
 	prompt: string;
 	input_images?: string[];
-	aspect_ratio?: '1:1' | '3:2' | '2:3';
-	quality?: 'low' | 'medium' | 'high' | 'auto';
+	aspect_ratio?:
+		| '1:1'
+		| '3:2'
+		| '2:3'
+		| '4:3'
+		| '3:4'
+		| '16:9'
+		| '9:16'
+		| 'auto';
+	quality?: 'low' | 'medium' | 'high' | 'xhigh' | 'max' | 'auto';
 	output_format?: 'webp' | 'png' | 'jpeg';
 	background?: 'auto' | 'opaque';
 	moderation?: 'auto' | 'low';
@@ -44,29 +52,33 @@ type ImageModelConfig = {
 	replicateId: `${string}/${string}`;
 	imageInputField: string;
 	options: ModelOption[];
+	fixedFields?: Record<string, string>;
 };
 
 export const modelConfig = {
-	'gpt-image-2': {
-		replicateId: 'openai/gpt-image-2',
+	'gpt-image-2.5-flare': {
+		replicateId: 'openai/gpt-image-2.5-flare',
 		imageInputField: 'input_images',
+		fixedFields: { moderation: 'low', background: 'opaque' },
 		options: [
 			{
 				name: 'aspect_ratio',
-				values: ['1:1', '3:2', '2:3'],
+				values: ['1:1', '3:2', '2:3', '4:3', '3:4', '16:9', '9:16', 'auto'],
 				default: '1:1',
 				botVisible: true,
 			},
 			{
 				name: 'quality',
-				values: ['low', 'medium', 'high', 'auto'],
+				values: ['low', 'medium', 'high', 'xhigh', 'max', 'auto'],
 				default: 'low',
 				botVisible: true,
 				prices: {
 					low: '$0.012',
 					medium: '$0.047',
 					high: '$0.128',
-					auto: '$0.128',
+					xhigh: '$0.25',
+					max: '$0.50',
+					auto: '$0.25',
 				},
 			},
 			{
@@ -75,10 +87,37 @@ export const modelConfig = {
 				default: 'jpeg',
 				botVisible: false,
 			},
+		],
+	},
+	'gpt-image-2.5-sunburst': {
+		replicateId: 'openai/gpt-image-2.5-sunburst',
+		imageInputField: 'input_images',
+		fixedFields: { moderation: 'low', background: 'opaque' },
+		options: [
 			{
-				name: 'moderation',
-				values: ['auto', 'low'],
+				name: 'aspect_ratio',
+				values: ['1:1', '3:2', '2:3', '4:3', '3:4', '16:9', '9:16', 'auto'],
+				default: '1:1',
+				botVisible: true,
+			},
+			{
+				name: 'quality',
+				values: ['low', 'medium', 'high', 'xhigh', 'max', 'auto'],
 				default: 'low',
+				botVisible: true,
+				prices: {
+					low: '$0.012',
+					medium: '$0.047',
+					high: '$0.128',
+					xhigh: '$0.25',
+					max: '$0.50',
+					auto: '$0.25',
+				},
+			},
+			{
+				name: 'output_format',
+				values: ['webp', 'png', 'jpeg'],
+				default: 'jpeg',
 				botVisible: false,
 			},
 		],
@@ -86,6 +125,7 @@ export const modelConfig = {
 	'nano-banana-2': {
 		replicateId: 'google/nano-banana-2',
 		imageInputField: 'image_input',
+		fixedFields: {},
 		options: [
 			{
 				name: 'aspect_ratio',
