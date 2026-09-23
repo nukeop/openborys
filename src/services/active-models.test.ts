@@ -1,4 +1,13 @@
-import { beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
+import {
+  afterAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+  spyOn,
+} from 'bun:test';
+import type { RedisClient } from 'bun';
 import { RedisService } from './redis';
 
 const mockClient = {
@@ -6,7 +15,11 @@ const mockClient = {
   set: mock(),
 };
 
-spyOn(RedisService, 'client').mockReturnValue(mockClient as any);
+spyOn(RedisService, 'execute').mockImplementation(async (callback) =>
+  callback(mockClient as unknown as RedisClient),
+);
+
+afterAll(() => mock.restore());
 
 mock.module('../environment', () => ({
   env: () => ({ BOT_NAME: 'testbot' }),

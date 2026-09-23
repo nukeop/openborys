@@ -76,7 +76,7 @@ export class ActiveModelsService {
   }
 
   static async load(): Promise<void> {
-    const raw = await RedisService.client().get(redisKey());
+    const raw = await RedisService.execute((client) => client.get(redisKey()));
     if (!raw) {
       return;
     }
@@ -94,9 +94,8 @@ export class ActiveModelsService {
   }
 
   static async #persist(): Promise<void> {
-    await RedisService.client().set(
-      redisKey(),
-      JSON.stringify(ActiveModelsService.#state),
+    await RedisService.execute((client) =>
+      client.set(redisKey(), JSON.stringify(ActiveModelsService.#state)),
     );
   }
 }

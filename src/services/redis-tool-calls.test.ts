@@ -1,5 +1,14 @@
-import { beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
+import {
+  afterAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+  spyOn,
+} from 'bun:test';
 import type { ToolCallPart, ToolResultPart } from 'ai';
+import type { RedisClient } from 'bun';
 import { RedisService } from './redis';
 import {
   RedisToolCallService,
@@ -16,7 +25,11 @@ const mockClient = {
   send: mock(),
 };
 
-spyOn(RedisService, 'client').mockReturnValue(mockClient as any);
+spyOn(RedisService, 'execute').mockImplementation(async (callback) =>
+  callback(mockClient as unknown as RedisClient),
+);
+
+afterAll(() => mock.restore());
 
 const sampleCall: ToolCallPart = {
   type: 'tool-call',

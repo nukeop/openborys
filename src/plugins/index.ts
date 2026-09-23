@@ -86,7 +86,7 @@ export async function loadPlugins(): Promise<void> {
         toolService: ToolService,
         scopedToolService: ScopedToolService,
         commandService: DiscordCommandsService,
-        redis: RedisService.client(),
+        redis: RedisService.execute,
         friends: FriendsService,
         strings: StringsService,
         embeddings: EmbeddingsService,
