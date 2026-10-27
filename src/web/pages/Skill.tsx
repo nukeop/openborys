@@ -14,7 +14,7 @@ export function Skill() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-8">
+    <div className="mx-auto max-w-4xl space-y-4 px-3 py-6 sm:space-y-6 sm:p-8">
       <title>{data.name}</title>
       <Link
         to="/"
@@ -23,7 +23,7 @@ export function Skill() {
         &larr; Back
       </Link>
 
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 sm:p-6">
         <div className="mb-2 flex items-center gap-3">
           <h1 className="font-bold text-xl text-zinc-100">{data.name}</h1>
         </div>

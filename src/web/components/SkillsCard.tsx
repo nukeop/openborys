@@ -52,7 +52,7 @@ export function SkillsCard() {
   }
 
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+    <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 sm:p-6">
       <div className="mb-4 flex items-center gap-3">
         <h2 className="shrink-0 font-semibold text-zinc-100">Loaded skills</h2>
         <span className="shrink-0 rounded-full bg-zinc-800 px-2 py-0.5 font-mono text-xs text-zinc-400">

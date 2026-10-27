@@ -43,7 +43,7 @@ export function ToolsCard() {
 	}
 
 	return (
-		<div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+		<div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 sm:p-6">
 			<div className="mb-4 flex items-center gap-3">
 				<h2 className="font-semibold text-zinc-100">Tools</h2>
 				<span className="rounded-full bg-zinc-800 px-2 py-0.5 font-mono text-xs text-zinc-400">

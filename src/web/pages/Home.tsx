@@ -6,13 +6,13 @@ import { ToolsCard } from '../components/ToolsCard';
 
 export function Home() {
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-8">
+    <div className="mx-auto max-w-4xl space-y-4 px-3 py-6 sm:space-y-6 sm:p-8">
       <title>Dashboard</title>
       <h1 className="font-bold text-2xl text-zinc-100">Dashboard</h1>
       <IntrospectCard />
       <ToolsCard />
       <SkillsCard />
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
         <ReplyDecisionsCard />
         <PhoneCallsCard />
       </div>

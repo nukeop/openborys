@@ -26,7 +26,7 @@ export function IntrospectCard() {
   const usageRatio = 1 - data.memory.free / data.memory.total;
 
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+    <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 sm:p-6">
       <div className="mb-6 flex items-center gap-3">
         <div className="h-2 w-2 rounded-full bg-teal-400 shadow-[0_0_6px_var(--color-teal-400)]" />
         <h2 className="font-semibold text-zinc-100">{data.name}</h2>
