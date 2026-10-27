@@ -14,6 +14,7 @@ const exactTimeFormat = new Intl.DateTimeFormat(undefined, {
 
 export function ChatBubble({ message }: { message: PhoneMessage }) {
   const isBot = message.sender === 'bot';
+  const hasText = message.content.trim().length > 0;
 
   return (
     <div
@@ -31,15 +32,17 @@ export function ChatBubble({ message }: { message: PhoneMessage }) {
         {message.imageUrls.map((url) => (
           <BubbleImage key={url} url={url} />
         ))}
-        <div
-          title={exactTimeFormat.format(message.timestamp)}
-          className={clsx('rounded-2xl px-4 py-2 text-sm leading-relaxed', {
-            'rounded-br-sm bg-teal-700 text-teal-50': isBot,
-            'rounded-bl-sm bg-zinc-700 text-zinc-100': !isBot,
-          })}
-        >
-          {message.content}
-        </div>
+        {hasText && (
+          <div
+            title={exactTimeFormat.format(message.timestamp)}
+            className={clsx('rounded-2xl px-4 py-2 text-sm leading-relaxed', {
+              'rounded-br-sm bg-teal-700 text-teal-50': isBot,
+              'rounded-bl-sm bg-zinc-700 text-zinc-100': !isBot,
+            })}
+          >
+            {message.content}
+          </div>
+        )}
         <span className="px-1 text-xs text-zinc-500">
           {timestampFormat.format(message.timestamp)}
         </span>
