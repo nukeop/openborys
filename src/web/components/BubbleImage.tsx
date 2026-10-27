@@ -16,14 +16,14 @@ export function BubbleImage({ url }: { url: string }) {
         type="button"
         aria-label="Open image preview"
         onClick={() => setLightboxOpen(true)}
-        className="cursor-zoom-in"
+        className="block max-w-full cursor-zoom-in rounded-[18px] focus-visible:outline-2 focus-visible:outline-teal-400 focus-visible:outline-offset-2"
       >
         <img
           src={url}
           alt="Message attachment"
           loading="lazy"
           onError={() => setFailed(true)}
-          className="max-h-64 rounded-2xl border border-zinc-800 object-cover transition-opacity hover:opacity-80"
+          className="max-h-64 max-w-full rounded-[18px] object-cover transition-opacity hover:opacity-80"
         />
       </button>
       {lightboxOpen && (
