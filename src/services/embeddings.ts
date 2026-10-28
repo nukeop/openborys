@@ -1,5 +1,5 @@
-import { openai } from '@ai-sdk/openai';
 import { getLogger } from '@logtape/logtape';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { embed } from 'ai';
 import { env } from '../environment';
@@ -31,7 +31,9 @@ export class EmbeddingsService {
   static async embedding(text: string) {
     logger.debug('Generating embedding...');
     const result = await embed({
-      model: openai.embedding('text-embedding-3-small'),
+      model: createOpenRouter({
+        apiKey: env().OPENROUTER_API_KEY,
+      }).textEmbeddingModel('openai/text-embedding-3-small'),
       value: text,
     });
     return result.embedding;

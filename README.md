@@ -26,7 +26,6 @@ Copy `.env.template` and fill in the values.
 | `DISCORD_CLIENT_ID` | Application ID for the bot |
 | `REDIS_URL` | Redis connection string (stores tool call history) |
 | `ANTHROPIC_API_KEY` | Anthropic API key for Claude |
-| `OPENAI_API_KEY` | OpenAI API key |
 | `REPLICATE_API_TOKEN` | Replicate API token (image generation) |
 | `TAVILY_API_KEY` | Tavily API key (web search tool) |
 | `AWS_ACCESS_KEY_ID` | Tigris object storage access key |

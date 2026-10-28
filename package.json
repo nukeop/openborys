@@ -26,7 +26,6 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.71",
-    "@ai-sdk/openai": "^3.0.53",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@fontsource-variable/sora": "^5.2.8",
     "@logtape/logtape": "^2.0.5",

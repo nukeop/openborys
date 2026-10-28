@@ -34,7 +34,6 @@ const envSchema = z.object({
   QDRANT_COLLECTION: z.string().min(1),
   QDRANT_BOT_NAME: z.string().min(1),
 
-  OPENAI_API_KEY: z.string().min(1),
   BOT_NAME: z.string().min(1),
 
   DASHBOARD_PWD: z.string().min(1),
