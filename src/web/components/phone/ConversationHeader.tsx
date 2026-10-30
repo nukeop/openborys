@@ -16,7 +16,7 @@ function ContactAvatar({ name }: { name: string }) {
 
 export function ConversationHeader({ contact }: { contact: string }) {
   return (
-    <header className="sticky top-0 z-20 grid grid-cols-[1fr_auto_1fr] items-start border-zinc-800/80 border-b bg-zinc-950/75 px-2 pt-2 pb-2 backdrop-blur-xl sm:pt-[54px]">
+    <header className="sticky top-0 z-20 grid grid-cols-[1fr_auto_1fr] items-start border-zinc-800/80 border-b bg-zinc-950/75 px-2 pt-2 pb-2 backdrop-blur-xl">
       <Link
         to="/"
         aria-label="Back to dashboard"

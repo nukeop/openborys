@@ -42,7 +42,7 @@ export function PhoneConversation({
       className="flex h-full flex-col overflow-y-auto overscroll-contain [scrollbar-width:none]"
     >
       <ConversationHeader contact={contact} />
-      <div ref={contentRef} className="flex-1 px-4 pt-2 pb-4 sm:pb-8">
+      <div ref={contentRef} className="flex-1 px-4 pt-2 pb-4">
         <ConversationBody messages={messages} />
       </div>
     </div>
