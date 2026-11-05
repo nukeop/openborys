@@ -1,13 +1,13 @@
 import {
-  type GptImage25Input,
+  type GptImage26Input,
   type ImageModelName,
   modelConfig,
   type NanoBanana2Input,
 } from './config';
 
 type ReplicatePayload = {
-  'gpt-image-2.5-flare': GptImage25Input;
-  'gpt-image-2.5-sunburst': GptImage25Input;
+  'gpt-image-2.6-flare': GptImage26Input;
+  'gpt-image-2.6-sunburst': GptImage26Input;
   'nano-banana-2': NanoBanana2Input;
 };
 

@@ -1,4 +1,4 @@
-export type GptImage25Input = {
+export type GptImage26Input = {
 	prompt: string;
 	input_images?: string[];
 	aspect_ratio?:
@@ -11,6 +11,7 @@ export type GptImage25Input = {
 		| '9:16'
 		| 'auto';
 	quality?: 'low' | 'medium' | 'high' | 'xhigh' | 'max' | 'auto';
+	complexity?: 'low' | 'medium' | 'high';
 	output_format?: 'webp' | 'png' | 'jpeg';
 	background?: 'auto' | 'opaque';
 	moderation?: 'auto' | 'low';
@@ -56,8 +57,8 @@ type ImageModelConfig = {
 };
 
 export const modelConfig = {
-	'gpt-image-2.5-flare': {
-		replicateId: 'openai/gpt-image-2.5-flare',
+	'gpt-image-2.6-flare': {
+		replicateId: 'openai/gpt-image-2.6-flare',
 		imageInputField: 'input_images',
 		fixedFields: { moderation: 'low', background: 'opaque' },
 		options: [
@@ -80,6 +81,12 @@ export const modelConfig = {
 					max: '$0.50',
 					auto: '$0.25',
 				},
+			},
+			{
+				name: 'complexity',
+				values: ['low', 'medium', 'high'],
+				default: 'high',
+				botVisible: true,
 			},
 			{
 				name: 'output_format',
@@ -89,8 +96,8 @@ export const modelConfig = {
 			},
 		],
 	},
-	'gpt-image-2.5-sunburst': {
-		replicateId: 'openai/gpt-image-2.5-sunburst',
+	'gpt-image-2.6-sunburst': {
+		replicateId: 'openai/gpt-image-2.6-sunburst',
 		imageInputField: 'input_images',
 		fixedFields: { moderation: 'low', background: 'opaque' },
 		options: [
@@ -113,6 +120,12 @@ export const modelConfig = {
 					max: '$0.50',
 					auto: '$0.25',
 				},
+			},
+			{
+				name: 'complexity',
+				values: ['low', 'medium', 'high'],
+				default: 'high',
+				botVisible: true,
 			},
 			{
 				name: 'output_format',
