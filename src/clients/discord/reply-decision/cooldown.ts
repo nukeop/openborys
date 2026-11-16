@@ -1,15 +1,15 @@
-const DEFAULT_WINDOW_MS = 30_000;
+import { TYPING_DURATION_MS, type TypingTracker } from './typing-tracker';
 
 export type CooldownResult<T> =
   | { status: 'completed'; value: T }
   | { status: 'aborted' };
 
 export class ReplyDecisionCooldown {
-  readonly #windowMs: number;
   readonly #pending = new Map<string, AbortController>();
+  readonly #typing: TypingTracker;
 
-  constructor(windowMs: number = DEFAULT_WINDOW_MS) {
-    this.#windowMs = windowMs;
+  constructor(typing: TypingTracker) {
+    this.#typing = typing;
   }
 
   run = async <T>(
@@ -22,7 +22,7 @@ export class ReplyDecisionCooldown {
     this.#pending.set(channelId, controller);
 
     try {
-      await this.#wait(controller.signal);
+      await this.#wait(channelId, Date.now(), controller.signal);
       const value = await task(controller.signal);
       return { status: 'completed', value };
     } catch (error) {
@@ -42,18 +42,36 @@ export class ReplyDecisionCooldown {
     this.#pending.delete(channelId);
   };
 
-  #wait = (signal: AbortSignal): Promise<void> =>
+  #wait = (
+    channelId: string,
+    startedAt: number,
+    signal: AbortSignal,
+  ): Promise<void> =>
     new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        signal.removeEventListener('abort', onAbort);
-        resolve();
-      }, this.#windowMs);
+      let timeout: ReturnType<typeof setTimeout> | undefined;
 
       const onAbort = () => {
         clearTimeout(timeout);
         reject(signal.reason);
       };
 
+      const check = () => {
+        let readyAt = startedAt + 3_000;
+        const latestTyping = this.#typing.latest(channelId);
+        if (latestTyping !== undefined) {
+          readyAt = Math.max(readyAt, latestTyping + TYPING_DURATION_MS);
+        }
+
+        const remaining = readyAt - Date.now();
+        if (remaining > 0) {
+          timeout = setTimeout(check, remaining);
+          return;
+        }
+        signal.removeEventListener('abort', onAbort);
+        resolve();
+      };
+
       signal.addEventListener('abort', onAbort, { once: true });
+      check();
     });
 }

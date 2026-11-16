@@ -14,6 +14,7 @@ class DiscordClient extends Client {
         GatewayIntentBits.Guilds,
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildMessageTyping,
       ],
     });
   }

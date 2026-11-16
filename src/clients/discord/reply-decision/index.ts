@@ -1,87 +1,52 @@
 import { getLogger } from '@logtape/logtape';
 import type { Message } from 'discord.js';
-import { ai } from '../../../services/ai';
-import { StringsService } from '../../../services/strings';
 import { errorMessage } from '../../../utils/error';
-import { getDiscordContext } from '../context';
+import { decideWithAI } from './ai-decision';
 import { ReplyDecisionCooldown } from './cooldown';
-import { replyDecisionSchema } from './schema';
-import { type ReplyDecision, ReplyDecisionStore } from './store';
+import { Drex } from './drex';
+import { TypingTracker } from './typing-tracker';
 
 const logger = getLogger(['OpenBorys', 'Discord', 'ReplyDecision']);
 
-const cooldown = new ReplyDecisionCooldown();
+export class ReplyDecider {
+  static #typing = new TypingTracker();
+  static #cooldown = new ReplyDecisionCooldown(ReplyDecider.#typing);
 
-type ReplyDecisionStrings = {
-  instruction: string;
-  previousDecision: string;
-  noPreviousDecision: string;
-  reply: string;
-  skip: string;
-};
+  private constructor() {}
 
-const buildPreviousDecisionLine = (
-  strings: ReplyDecisionStrings,
-  previous: ReplyDecision | undefined,
-): string => {
-  if (!previous) {
-    return strings.noPreviousDecision;
-  }
+  static decide = async (message: Message): Promise<boolean> => {
+    ReplyDecider.#forgetAuthorTyping(message);
 
-  const decisionWord = previous.shouldReply ? strings.reply : strings.skip;
-  return strings.previousDecision
-    .replace('{decision}', decisionWord)
-    .replace('{reason}', previous.reason);
-};
+    try {
+      const result = await ReplyDecider.#cooldown.run(
+        message.channelId,
+        async (signal) => {
+          const finished = await Drex.isThoughtFinished(message, signal);
+          if (!finished) {
+            return false;
+          }
+          return decideWithAI(message, signal);
+        },
+      );
+      return result.status === 'completed' && result.value;
+    } catch (error) {
+      logger.error('Reply decision failed: {message}', {
+        message: errorMessage(error),
+      });
+      return false;
+    }
+  };
 
-const decideWithAI = async (
-  message: Message,
-  signal: AbortSignal,
-): Promise<boolean> => {
-  const strings = StringsService.get('reply-decision') as ReplyDecisionStrings;
-  const { systemPrompt, context } = await getDiscordContext(message, 'cheap');
-  const previous = ReplyDecisionStore.getLatest(message.channelId);
+  static cancel = (message: Message): void => {
+    ReplyDecider.#forgetAuthorTyping(message);
+    ReplyDecider.#cooldown.abort(message.channelId);
+  };
 
-  const decisionPrompt = [
-    systemPrompt,
-    strings.instruction,
-    buildPreviousDecisionLine(strings, previous),
-  ].join('\n\n');
+  static recordTyping = (channelId: string, userId: string): void => {
+    ReplyDecider.#typing.record(channelId, userId);
+  };
 
-  const result = await ai.generateCheapObject(
-    [{ role: 'system', content: decisionPrompt }, ...context],
-    replyDecisionSchema,
-    signal,
-  );
-
-  logger.info('AI reply decision: {decision} - {reason}', {
-    decision: result.shouldReply ? 'reply' : 'skip',
-    reason: result.reason,
-  });
-
-  ReplyDecisionStore.record(message.channelId, {
-    shouldReply: result.shouldReply,
-    reason: result.reason,
-    timestamp: Date.now(),
-  });
-
-  return result.shouldReply;
-};
-
-export const cancelPendingDecision = (channelId: string): void => {
-  cooldown.abort(channelId);
-};
-
-export const decideReply = async (message: Message): Promise<boolean> => {
-  try {
-    const result = await cooldown.run(message.channelId, (signal) =>
-      decideWithAI(message, signal),
-    );
-    return result.status === 'completed' && result.value;
-  } catch (error) {
-    logger.error('Reply decision failed: {message}', {
-      message: errorMessage(error),
-    });
-    return false;
-  }
-};
+  static #forgetAuthorTyping = (message: Message): void => {
+    ReplyDecider.#typing.forget(message.channelId, message.author.id);
+  };
+}

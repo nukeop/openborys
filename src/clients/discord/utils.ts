@@ -1,7 +1,7 @@
 import type { Attachment, Client, Message, TextBasedChannel } from 'discord.js';
 import type { ReplyTrigger } from '../../agents/discord/types';
 import { DISCORD_CONFIG } from '../../config/platforms/discord';
-import { cancelPendingDecision, decideReply } from './reply-decision';
+import { ReplyDecider } from './reply-decision';
 
 export const shouldReply = async (
   client: Client,
@@ -18,11 +18,11 @@ export const shouldReply = async (
   }
 
   if (message.mentions.has(client.user)) {
-    cancelPendingDecision(message.channelId);
+    ReplyDecider.cancel(message);
     return 'mention';
   }
 
-  const decided = await decideReply(message);
+  const decided = await ReplyDecider.decide(message);
   return decided ? 'decision' : null;
 };
 

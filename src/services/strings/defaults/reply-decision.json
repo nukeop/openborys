@@ -4,5 +4,8 @@
   "noPreviousDecision": "You have no previous decisions in this channel yet.",
   "reply": "reply",
   "skip": "skip",
-  "chosenToReply": "You chose to reply for this reason: {reason}."
+  "chosenToReply": "You chose to reply for this reason: {reason}.",
+  "drexFinishedInstruction": "Did the last speaker finish their thought, or are they likely to send another message soon?",
+  "drexFinishedTrue": "The last message is a complete thought.",
+  "drexFinishedFalse": "The last message is cut off or more messages are likely coming."
 }
