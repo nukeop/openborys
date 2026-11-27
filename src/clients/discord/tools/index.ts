@@ -15,10 +15,11 @@ export const registerDiscordTools = (message: Message) => {
   ScopedToolService.registerTool(createPhoneTool(message), message.id);
   ScopedToolService.instantiateFactories('discord', message, message.id);
 
+  // Scoped ids end with the message id; scripts get ids that stay the same across messages.
   const catalog = [
     ...ToolService.getAlwaysAvailableTools(),
     ...ScopedToolService.getToolsForScope(message.id),
-  ];
+  ].map((tool) => ({ ...tool, id: tool.id.replace(`_${message.id}`, '') }));
   ScopedToolService.registerTool(
     createRunScriptTool(message, catalog),
     message.id,
