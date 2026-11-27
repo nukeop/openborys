@@ -3,21 +3,22 @@ import { EmbedBuilder, type Message } from 'discord.js';
 import { env } from '../../environment';
 import type { StoredRun } from '../../services/runs';
 import { errorMessage } from '../../utils/error';
+import { CallTable } from './call-table';
 import type { ScriptToolCall } from './run-script';
 
 const logger = getLogger(['OpenBorys', 'tools', 'run-script']);
 
 export class ScriptEmbed {
-  static #visibleCalls = 10;
-  static #summaryLength = 80;
+  static #colors = { running: 0x71717a, success: 0x14b8a6, error: 0xef4444 };
+  static #statusLabels = { success: 'Success', error: 'Error' };
 
   readonly #message: Message;
-  readonly #heading: string;
+  readonly #title: string;
   #edits: Promise<unknown> = Promise.resolve();
 
-  private constructor(message: Message, heading: string) {
+  private constructor(message: Message, title: string) {
     this.#message = message;
-    this.#heading = heading;
+    this.#title = title;
   }
 
   static async send(source: Message, tool: { emoji: string; name: string }) {
@@ -25,39 +26,54 @@ export class ScriptEmbed {
       throw new Error('Cannot send the script embed to this channel');
     }
 
-    const heading = `${tool.emoji} **${tool.name}**`;
-    const embed = ScriptEmbed.#embed([heading, '⏳']);
+    const title = `${tool.emoji} ${tool.name}`;
+    const embed = ScriptEmbed.#embed(title, [])
+      .setColor(ScriptEmbed.#colors.running)
+      .setFooter({ text: 'Running' });
     const message = await source.channel.send({ embeds: [embed] });
 
-    return new ScriptEmbed(message, heading);
+    return new ScriptEmbed(message, title);
   }
 
-  static #embed(lines: string[]) {
-    return new EmbedBuilder().setDescription(lines.join('\n'));
+  static #embed(title: string, calls: ScriptToolCall[]) {
+    const embed = new EmbedBuilder().setTitle(title);
+    if (calls.length > 0) {
+      embed.setDescription(new CallTable(calls).toString());
+    }
+
+    return embed;
   }
 
   showCalls(calls: ScriptToolCall[]) {
-    this.#edit(calls, '⏳');
+    const embed = ScriptEmbed.#embed(this.#title, calls)
+      .setColor(ScriptEmbed.#colors.running)
+      .setFooter({ text: `Running · Tool calls: ${calls.length}` });
+
+    this.#edit(embed);
   }
 
   finish(run: StoredRun) {
-    const statusEmoji = { success: '✅', error: '❌' }[run.result.status];
-    const parts = [statusEmoji, this.#duration(run)];
+    const { status, calls } = run.result;
+    const footer = [
+      ScriptEmbed.#statusLabels[status],
+      `Tool calls: ${calls.length}`,
+      this.#duration(run),
+    ];
+    const embed = ScriptEmbed.#embed(this.#title, calls)
+      .setColor(ScriptEmbed.#colors[status])
+      .setFooter({ text: footer.join(' · ') });
 
     const dashboardUrl = env().DASHBOARD_URL;
     if (dashboardUrl) {
-      parts.push(`[Details](${dashboardUrl}/runs/${run.id})`);
+      embed.setURL(`${dashboardUrl}/runs/${run.id}`);
     }
 
-    this.#edit(run.result.calls, parts.join(' '));
+    this.#edit(embed);
 
     return this.#edits;
   }
 
-  #edit(calls: ScriptToolCall[], footer: string) {
-    const lines = [this.#heading, ...this.#callLines(calls), footer];
-    const embed = ScriptEmbed.#embed(lines);
-
+  #edit(embed: EmbedBuilder) {
     this.#edits = this.#edits
       .then(() => this.#message.edit({ embeds: [embed] }))
       .catch((error) => {
@@ -65,39 +81,6 @@ export class ScriptEmbed {
           error: errorMessage(error),
         });
       });
-  }
-
-  #callLines(calls: ScriptToolCall[]) {
-    const lines = calls
-      .slice(-ScriptEmbed.#visibleCalls)
-      .map((call) => this.#callLine(call));
-
-    const hiddenCount = calls.length - ScriptEmbed.#visibleCalls;
-    if (hiddenCount > 0) {
-      lines.unshift(`+${hiddenCount} earlier`);
-    }
-
-    return lines;
-  }
-
-  #callLine(call: ScriptToolCall) {
-    const summary = call.summary
-      .replace(/\s+/g, ' ')
-      .slice(0, ScriptEmbed.#summaryLength);
-
-    return `${call.emoji} **${call.name}** ${summary} ${this.#callStatus(call)}`;
-  }
-
-  #callStatus(call: ScriptToolCall) {
-    if (call.error) {
-      return '❌';
-    }
-
-    if (!('durationMs' in call)) {
-      return '⏳';
-    }
-
-    return '✅';
   }
 
   #duration(run: StoredRun) {
