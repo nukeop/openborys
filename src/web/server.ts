@@ -3,6 +3,7 @@ import { ReplyDecisionStore } from '../clients/discord/reply-decision/store';
 import { PhoneMessageCache } from '../tools/phone/message-cache';
 import { errorMessage } from '../utils/error';
 import { getIntrospection } from './api/introspect';
+import { getRun, getRunSummaries } from './api/runs';
 import { getSkill, getSkills, loadSkill, unloadSkill } from './api/skills';
 import { getTools } from './api/tools';
 import { guard } from './auth';
@@ -43,6 +44,19 @@ export function startAdminServer() {
           PhoneMessageCache.getInstance().getConversation(contact),
         );
       }),
+      '/api/runs': {
+        GET: guard(async () => Response.json(await getRunSummaries())),
+      },
+      '/api/runs/:id': {
+        GET: guard(async (req) => {
+          const run = await getRun(req.params.id);
+          if (!run) {
+            return Response.json({ error: 'Run not found' }, { status: 404 });
+          }
+
+          return Response.json(run);
+        }),
+      },
       '/api/skills': {
         GET: guard(() => Response.json(getSkills())),
         POST: guard(async (req) => {

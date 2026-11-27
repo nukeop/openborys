@@ -50,9 +50,9 @@ export class RunStore {
     });
   }
 
-  static async listRecent(): Promise<StoredRun[]> {
+  static async listRecent(limit: number): Promise<StoredRun[]> {
     return RedisService.execute(async (client) => {
-      const ids = await client.lrange(RunStore.#listKey(), 0, -1);
+      const ids = await client.lrange(RunStore.#listKey(), 0, limit - 1);
       if (!ids.length) {
         return [];
       }

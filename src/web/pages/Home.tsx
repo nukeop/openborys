@@ -1,6 +1,7 @@
 import { IntrospectCard } from '../components/IntrospectCard';
 import { PhoneCallsCard } from '../components/PhoneCallsCard';
 import { ReplyDecisionsCard } from '../components/ReplyDecisionsCard';
+import { RunsCard } from '../components/RunsCard';
 import { SkillsCard } from '../components/SkillsCard';
 import { ToolsCard } from '../components/ToolsCard';
 
@@ -16,6 +17,7 @@ export function Home() {
         <ReplyDecisionsCard />
         <PhoneCallsCard />
       </div>
+      <RunsCard />
     </div>
   );
 }
