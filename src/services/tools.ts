@@ -6,6 +6,7 @@ export type ToolWithMeta<INPUT, OUTPUT> = {
   name: string;
   emoji: string;
   isAlwaysAvailable: boolean;
+  hasOwnDisplay?: boolean;
   provider?: Provider;
   formatArgs: (args: INPUT) => string;
   execute: (input: INPUT) => Promise<OUTPUT>;

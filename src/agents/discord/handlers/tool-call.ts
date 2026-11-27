@@ -28,7 +28,7 @@ export const toolCall: StateHandler = async (ctx) => {
     throw new Error(`Tool not found: ${call.toolName}`);
   }
 
-  if (ctx.source.channel.isSendable()) {
+  if (!tool.hasOwnDisplay && ctx.source.channel.isSendable()) {
     const formattedArgs = tool.formatArgs(call.input as never);
     const embed = new EmbedBuilder().setDescription(
       `${tool.emoji} **${tool.name}**\n${formattedArgs}`,
