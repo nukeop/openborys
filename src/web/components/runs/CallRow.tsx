@@ -1,16 +1,18 @@
-import { IoChevronForward } from 'react-icons/io5';
+import clsx from 'clsx';
 import type { ScriptToolCall } from '../../../tools/run-script/run-script';
+import { StatusDot, type StatusTone } from '../StatusDot';
 import { CallOutcome } from './CallOutcome';
 import { CallTimeline } from './CallTimeline';
 import { CodeBlock } from './CodeBlock';
-import { type CallStatus, callStatus } from './call-status';
+import { callElementId } from './call-anchor';
+import { callStatus } from './call-status';
 import { formatJson } from './format-json';
 import { formatDuration } from './time-format';
 
-const statusIcons: Record<CallStatus, { icon: string; label: string }> = {
-  success: { icon: '✅', label: 'Succeeded' },
-  error: { icon: '❌', label: 'Failed' },
-  pending: { icon: '⏳', label: 'Unfinished' },
+const statusLabels: Record<StatusTone, string> = {
+  success: 'Succeeded',
+  error: 'Failed',
+  pending: 'Unfinished',
 };
 
 function CallDuration({ call }: { call: ScriptToolCall }) {
@@ -20,33 +22,32 @@ function CallDuration({ call }: { call: ScriptToolCall }) {
   }
 
   return (
-    <span className="w-12 shrink-0 text-right font-mono text-xs text-zinc-400 tabular-nums">
+    <span className="shrink-0 font-mono text-xs text-zinc-500 tabular-nums">
       {text}
     </span>
   );
 }
 
-function CallHeading({ call }: { call: ScriptToolCall }) {
-  const status = statusIcons[callStatus(call)];
+function CallHeading({ call, index }: { call: ScriptToolCall; index: number }) {
+  const status = callStatus(call);
 
   return (
     <div className="flex items-center gap-3">
-      <IoChevronForward
-        aria-hidden="true"
-        className="size-3.5 shrink-0 text-zinc-500 transition-transform duration-150 group-open:rotate-90"
-      />
-      <span aria-hidden="true" className="text-lg leading-none">
+      <span className="shrink-0 font-mono text-xs text-zinc-500 tabular-nums">
+        #{index + 1}
+      </span>
+      <StatusDot tone={status} label={statusLabels[status]} />
+      <span aria-hidden="true" className="shrink-0">
         {call.emoji}
       </span>
-      <div className="flex min-w-0 flex-1 flex-col sm:flex-row sm:items-baseline sm:gap-2">
-        <span className="truncate font-medium text-sm text-zinc-200 sm:shrink-0">
+      <div className="flex min-w-0 flex-1 flex-col sm:flex-row sm:items-baseline sm:gap-3">
+        <span className="truncate font-medium text-sm text-zinc-100 sm:shrink-0">
           {call.name}
         </span>
-        <span className="truncate text-sm text-zinc-500">{call.summary}</span>
+        <span className="truncate font-mono text-xs text-zinc-500">
+          {call.summary}
+        </span>
       </div>
-      <span role="img" aria-label={status.label} title={status.label}>
-        {status.icon}
-      </span>
       <CallDuration call={call} />
     </div>
   );
@@ -54,24 +55,36 @@ function CallHeading({ call }: { call: ScriptToolCall }) {
 
 export function CallRow({
   call,
+  index,
   runStartedAt,
   runEndedAt,
 }: {
   call: ScriptToolCall;
+  index: number;
   runStartedAt: number;
   runEndedAt: number;
 }) {
   return (
-    <details className="group">
-      <summary className="flex cursor-pointer list-none flex-col gap-2.5 rounded-md px-2 py-2.5 transition-colors hover:bg-zinc-800/50 focus-visible:outline-2 focus-visible:outline-teal-400 [&::-webkit-details-marker]:hidden">
-        <CallHeading call={call} />
+    <details
+      id={callElementId(index)}
+      open={Boolean(call.error)}
+      className={clsx(
+        'group scroll-mt-4 rounded-md border bg-zinc-800/40 transition-colors',
+        {
+          'border-red-500/40': call.error,
+          'border-zinc-800 hover:border-zinc-700': !call.error,
+        },
+      )}
+    >
+      <summary className="flex cursor-pointer list-none flex-col gap-3 rounded-md px-4 py-3 focus-visible:outline-2 focus-visible:outline-teal-400 [&::-webkit-details-marker]:hidden">
+        <CallHeading call={call} index={index} />
         <CallTimeline
           call={call}
           runStartedAt={runStartedAt}
           runEndedAt={runEndedAt}
         />
       </summary>
-      <div className="grid gap-3 px-2 pt-1 pb-4 sm:pl-8">
+      <div className="grid gap-3 px-4 pb-4">
         <CodeBlock label="Input" text={formatJson(call.input)} />
         <CallOutcome call={call} />
       </div>

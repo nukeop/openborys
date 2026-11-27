@@ -24,7 +24,7 @@ export function RunsCard() {
         <p className="mt-4 text-sm text-zinc-500">No scripts yet.</p>
       )}
       {data.length > 0 && (
-        <div className="-mx-2 mt-4 flex max-h-96 flex-col gap-1 overflow-y-auto overscroll-contain px-2">
+        <div className="mt-4 flex max-h-[32rem] flex-col gap-2 overflow-y-auto overscroll-contain">
           {data.map((run) => (
             <RunRow key={run.id} run={run} />
           ))}

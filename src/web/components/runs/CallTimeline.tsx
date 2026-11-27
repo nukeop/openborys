@@ -1,7 +1,8 @@
 import type { ScriptToolCall } from '../../../tools/run-script/run-script';
-import { type CallStatus, callStatus } from './call-status';
+import type { StatusTone } from '../StatusDot';
+import { callStatus } from './call-status';
 
-const barColors: Record<CallStatus, string> = {
+const barColors: Record<StatusTone, string> = {
   success: 'bg-teal-400',
   error: 'bg-red-400',
   pending: 'bg-zinc-500',

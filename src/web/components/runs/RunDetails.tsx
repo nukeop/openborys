@@ -4,6 +4,7 @@ import { CallList } from './CallList';
 import { CodeBlock } from './CodeBlock';
 import { formatJson } from './format-json';
 import { LogList } from './LogList';
+import { RunErrorCard } from './RunErrorCard';
 import { RunHeader } from './RunHeader';
 import { RunSection } from './RunSection';
 import { ScriptCode } from './ScriptCode';
@@ -14,6 +15,10 @@ export function RunDetails({ run }: { run: StoredRun }) {
   return (
     <>
       <RunHeader run={run} />
+
+      {result.status === 'error' && (
+        <RunErrorCard error={result.error} calls={result.calls} />
+      )}
 
       <RunSection title="Script">
         <ScriptCode code={run.code} />

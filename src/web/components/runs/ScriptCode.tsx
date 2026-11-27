@@ -1,26 +1,35 @@
-import type { CSSProperties } from 'react';
+import { Highlight } from 'prism-react-renderer';
+import { scriptTheme } from './script-theme';
 
-/** Line numbers come from a CSS counter, so copying the code does not copy them. */
 export function ScriptCode({ code }: { code: string }) {
-  const lines = code.split('\n');
-  const gutter = { '--gutter': `${String(lines.length).length}ch` };
-
   return (
-    <pre
-      style={gutter as CSSProperties}
-      className="overflow-x-auto rounded-md bg-zinc-950 py-3 text-xs text-zinc-300 leading-5 [counter-reset:line]"
-    >
-      <code>
-        {lines.map((line, index) => (
-          <span
-            // biome-ignore lint/suspicious/noArrayIndexKey: lines of a fixed text
-            key={index}
-            className="block pr-4 [counter-increment:line] before:mr-4 before:inline-block before:w-[calc(var(--gutter)+1rem)] before:select-none before:text-right before:text-zinc-600 before:content-[counter(line)]"
-          >
-            {line}
-          </span>
-        ))}
-      </code>
-    </pre>
+    <Highlight code={code} language="typescript" theme={scriptTheme}>
+      {({ tokens, getLineProps, getTokenProps }) => (
+        <pre className="overflow-x-auto rounded-md bg-zinc-950 py-3 text-xs leading-5">
+          <code className="grid min-w-max">
+            {tokens.map((line, index) => (
+              <span
+                // biome-ignore lint/suspicious/noArrayIndexKey: lines of a fixed text
+                key={index}
+                {...getLineProps({ line, className: 'flex pr-4' })}
+              >
+                <span className="w-10 shrink-0 select-none pr-4 text-right text-zinc-600 tabular-nums">
+                  {index + 1}
+                </span>
+                <span>
+                  {line.map((token, tokenIndex) => (
+                    <span
+                      // biome-ignore lint/suspicious/noArrayIndexKey: tokens of a fixed line
+                      key={tokenIndex}
+                      {...getTokenProps({ token })}
+                    />
+                  ))}
+                </span>
+              </span>
+            ))}
+          </code>
+        </pre>
+      )}
+    </Highlight>
   );
 }

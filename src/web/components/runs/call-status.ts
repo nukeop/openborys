@@ -1,8 +1,7 @@
 import type { ScriptToolCall } from '../../../tools/run-script/run-script';
+import type { StatusTone } from '../StatusDot';
 
-export type CallStatus = 'pending' | 'error' | 'success';
-
-export function callStatus(call: ScriptToolCall): CallStatus {
+export function callStatus(call: ScriptToolCall): StatusTone {
   if (call.error) {
     return 'error';
   }
