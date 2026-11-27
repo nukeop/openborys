@@ -8,6 +8,7 @@ export type ScriptToolCall = {
   toolId: string;
   name: string;
   emoji: string;
+  summary: string;
   input: JSONValue;
   output?: JSONValue;
   error?: string;
@@ -30,17 +31,17 @@ class ScriptRun {
   readonly #calls: ScriptToolCall[] = [];
   readonly #worker: Worker;
   readonly #tools: Map<string, ToolWithMeta<any, any>>;
-  readonly #onToolCall: (call: ScriptToolCall) => void;
+  readonly #onCallsChange: (calls: ScriptToolCall[]) => void;
   #timer?: Timer;
 
   constructor(
     worker: Worker,
     tools: ToolWithMeta<any, any>[],
-    onToolCall: (call: ScriptToolCall) => void,
+    onCallsChange: (calls: ScriptToolCall[]) => void,
   ) {
     this.#worker = worker;
     this.#tools = new Map(tools.map((tool) => [tool.id, tool]));
-    this.#onToolCall = onToolCall;
+    this.#onCallsChange = onCallsChange;
   }
 
   run(code: string, timeoutMinutes: number) {
@@ -81,11 +82,12 @@ class ScriptRun {
       toolId,
       name: tool.name,
       emoji: tool.emoji,
+      summary: tool.formatArgs(input),
       input,
       startedAt: Date.now(),
     };
     this.#calls.push(call);
-    this.#onToolCall(call);
+    this.#onCallsChange(this.#calls);
 
     try {
       const validInput = await this.#validate(tool.tool.inputSchema, input);
@@ -97,6 +99,7 @@ class ScriptRun {
       throw error;
     } finally {
       call.durationMs = Date.now() - call.startedAt;
+      this.#onCallsChange(this.#calls);
     }
   }
 
@@ -124,14 +127,14 @@ class ScriptRun {
 export const runScript = ({
   code,
   tools,
-  onToolCall,
+  onCallsChange,
   timeoutMinutes = 10,
 }: {
   code: string;
   tools: ToolWithMeta<any, any>[];
-  onToolCall: (call: ScriptToolCall) => void;
+  onCallsChange: (calls: ScriptToolCall[]) => void;
   timeoutMinutes?: number;
 }) => {
   const worker = new Worker(import.meta.resolve('./worker.ts'));
-  return new ScriptRun(worker, tools, onToolCall).run(code, timeoutMinutes);
+  return new ScriptRun(worker, tools, onCallsChange).run(code, timeoutMinutes);
 };

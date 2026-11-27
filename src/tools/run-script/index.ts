@@ -69,7 +69,7 @@ export const createRunScriptTool = (
       const result = await runScript({
         code,
         tools: catalog,
-        onToolCall: (call) => embed.addCall(call.emoji),
+        onCallsChange: (calls) => embed.showCalls(calls),
       });
 
       const run: StoredRun = {

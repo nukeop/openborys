@@ -20,25 +20,47 @@ describe('runScript', () => {
   });
 
   it('returns the value, the logs, and the recorded calls', async () => {
-    const { result, startedCalls } = await scriptRunner.run(
+    const { result } = await scriptRunner.run(
       `console.log('repeating', 2);
       return await tools.repeat({ text: 'ab', times: 2 });`,
+    );
+
+    expect(result).toEqual({
+      status: 'success',
+      value: 'abab',
+      logs: ['repeating 2'],
+      calls: [
+        {
+          toolId: 'repeat',
+          name: 'Repeat',
+          emoji: '🔁',
+          summary: 'ab',
+          input: { text: 'ab', times: 2 },
+          startedAt: now.getTime(),
+          output: 'abab',
+          durationMs: 1500,
+        },
+      ],
+    });
+  });
+
+  it('reports the calls when a call starts and when it ends', async () => {
+    const { callUpdates } = await scriptRunner.run(
+      `return tools.repeat({ text: 'ab', times: 2 });`,
     );
 
     const startedCall = {
       toolId: 'repeat',
       name: 'Repeat',
       emoji: '🔁',
+      summary: 'ab',
       input: { text: 'ab', times: 2 },
       startedAt: now.getTime(),
     };
-    expect(result).toEqual({
-      status: 'success',
-      value: 'abab',
-      logs: ['repeating 2'],
-      calls: [{ ...startedCall, output: 'abab', durationMs: 1500 }],
-    });
-    expect(startedCalls).toEqual([startedCall]);
+    expect(callUpdates).toEqual([
+      [startedCall],
+      [{ ...startedCall, output: 'abab', durationMs: 1500 }],
+    ]);
   });
 
   it('applies the zod defaults to tool inputs', async () => {

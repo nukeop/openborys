@@ -3,13 +3,16 @@ import { EmbedBuilder, type Message } from 'discord.js';
 import { env } from '../../environment';
 import type { StoredRun } from '../../services/runs';
 import { errorMessage } from '../../utils/error';
+import type { ScriptToolCall } from './run-script';
 
 const logger = getLogger(['OpenBorys', 'tools', 'run-script']);
 
 export class ScriptEmbed {
+  static #visibleCalls = 10;
+  static #summaryLength = 80;
+
   readonly #message: Message;
   readonly #heading: string;
-  readonly #emojis: string[] = [];
   #edits: Promise<unknown> = Promise.resolve();
 
   private constructor(message: Message, heading: string) {
@@ -23,37 +26,37 @@ export class ScriptEmbed {
     }
 
     const heading = `${tool.emoji} **${tool.name}**`;
-    const embed = ScriptEmbed.#embed(heading, '⏳');
+    const embed = ScriptEmbed.#embed([heading, '⏳']);
     const message = await source.channel.send({ embeds: [embed] });
 
     return new ScriptEmbed(message, heading);
   }
 
-  static #embed(heading: string, status: string) {
-    return new EmbedBuilder().setDescription(`${heading}\n${status}`);
+  static #embed(lines: string[]) {
+    return new EmbedBuilder().setDescription(lines.join('\n'));
   }
 
-  addCall(emoji: string) {
-    this.#emojis.push(emoji);
-    this.#edit([...this.#emojis, '⏳']);
+  showCalls(calls: ScriptToolCall[]) {
+    this.#edit(calls, '⏳');
   }
 
   finish(run: StoredRun) {
     const statusEmoji = { success: '✅', error: '❌' }[run.result.status];
-    const parts = [...this.#emojis, statusEmoji, this.#duration(run)];
+    const parts = [statusEmoji, this.#duration(run)];
 
     const dashboardUrl = env().DASHBOARD_URL;
     if (dashboardUrl) {
       parts.push(`[Details](${dashboardUrl}/runs/${run.id})`);
     }
 
-    this.#edit(parts);
+    this.#edit(run.result.calls, parts.join(' '));
 
     return this.#edits;
   }
 
-  #edit(parts: string[]) {
-    const embed = ScriptEmbed.#embed(this.#heading, parts.join(' '));
+  #edit(calls: ScriptToolCall[], footer: string) {
+    const lines = [this.#heading, ...this.#callLines(calls), footer];
+    const embed = ScriptEmbed.#embed(lines);
 
     this.#edits = this.#edits
       .then(() => this.#message.edit({ embeds: [embed] }))
@@ -62,6 +65,39 @@ export class ScriptEmbed {
           error: errorMessage(error),
         });
       });
+  }
+
+  #callLines(calls: ScriptToolCall[]) {
+    const lines = calls
+      .slice(-ScriptEmbed.#visibleCalls)
+      .map((call) => this.#callLine(call));
+
+    const hiddenCount = calls.length - ScriptEmbed.#visibleCalls;
+    if (hiddenCount > 0) {
+      lines.unshift(`+${hiddenCount} earlier`);
+    }
+
+    return lines;
+  }
+
+  #callLine(call: ScriptToolCall) {
+    const summary = call.summary
+      .replace(/\s+/g, ' ')
+      .slice(0, ScriptEmbed.#summaryLength);
+
+    return `${call.emoji} **${call.name}** ${summary} ${this.#callStatus(call)}`;
+  }
+
+  #callStatus(call: ScriptToolCall) {
+    if (call.error) {
+      return '❌';
+    }
+
+    if (!('durationMs' in call)) {
+      return '⏳';
+    }
+
+    return '✅';
   }
 
   #duration(run: StoredRun) {
