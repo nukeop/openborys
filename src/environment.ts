@@ -37,6 +37,7 @@ const envSchema = z.object({
   BOT_NAME: z.string().min(1),
 
   DASHBOARD_PWD: z.string().min(1),
+  DASHBOARD_URL: z.url().optional(),
 });
 
 export type Environment = z.infer<typeof envSchema>;
